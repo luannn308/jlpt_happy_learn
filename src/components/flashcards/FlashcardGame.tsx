@@ -1,0 +1,179 @@
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { VocabularyItem, vocabularyData } from "@/data/vocabulary";
+import { kanjiData } from "@/data/kanji";
+import Flashcard from "./Flashcard";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, RotateCcw, Shuffle, Sparkles, BookOpen, Languages, BookA } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+export default function FlashcardGame() {
+    const [mode, setMode] = useState<"vocab" | "kanji">("vocab");
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isFlipped, setIsFlipped] = useState(false);
+    const [cards, setCards] = useState<(VocabularyItem | any)[]>(vocabularyData);
+    const [direction, setDirection] = useState(0);
+
+    // Reset game when mode changes
+    useEffect(() => {
+        const data = mode === "vocab" ? vocabularyData : kanjiData;
+        setCards(data);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+    }, [mode]);
+
+    const handleNext = useCallback(() => {
+        setDirection(1);
+        setIsFlipped(false);
+        setTimeout(() => {
+            setCurrentIndex((prev) => (prev + 1) % cards.length);
+        }, 100);
+    }, [cards.length]);
+
+    const handlePrev = useCallback(() => {
+        setDirection(-1);
+        setIsFlipped(false);
+        setTimeout(() => {
+            setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
+        }, 100);
+    }, [cards.length]);
+
+    const handleShuffle = () => {
+        const data = mode === "vocab" ? vocabularyData : kanjiData;
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        setCards(shuffled);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+    };
+
+    const handleReset = () => {
+        const data = mode === "vocab" ? vocabularyData : kanjiData;
+        setCards(data);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+    };
+
+    const progress = ((currentIndex + 1) / cards.length) * 100;
+
+    // Keyboard controls
+    const toggleFlip = useCallback(() => setIsFlipped((prev) => !prev), []);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code === "Space") {
+                e.preventDefault();
+                toggleFlip();
+            } else if (e.code === "ArrowRight") {
+                e.preventDefault();
+                handleNext();
+            } else if (e.code === "ArrowLeft") {
+                e.preventDefault();
+                handlePrev();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [toggleFlip, handleNext, handlePrev]);
+
+    return (
+        <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto space-y-8 py-10">
+            <div className="flex justify-center mb-4">
+                <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full max-w-md">
+                    <TabsList className="grid w-full grid-cols-2 bg-stone-100 p-1 rounded-2xl h-14 shadow-inner">
+                        <TabsTrigger
+                            value="vocab"
+                            className="rounded-[0.9rem] font-black uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all h-full text-stone-400"
+                        >
+                            <BookA className="mr-2 h-4 w-4" /> Từ vựng
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="kanji"
+                            className="rounded-[0.9rem] font-black uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all h-full text-stone-400"
+                        >
+                            <Languages className="mr-2 h-4 w-4" /> Hán tự
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            <div className="w-full max-w-md space-y-4 text-center">
+                <div className="flex items-center justify-between text-sm font-black uppercase tracking-widest text-stone-400">
+                    <span className="flex items-center gap-2">
+                        <BookOpen size={16} /> Thẻ {currentIndex + 1} / {cards.length}
+                    </span>
+                </div>
+            </div>
+
+            <div className="relative w-full flex items-center justify-center min-h-[500px]">
+                <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                        key={cards[currentIndex].id}
+                        custom={direction}
+                        initial={{ opacity: 0, x: direction * 100, scale: 0.9 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: direction * -100, scale: 0.9 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        className="w-full flex justify-center"
+                    >
+                        <Flashcard
+                            data={cards[currentIndex]}
+                            isFlipped={isFlipped}
+                            onFlip={() => setIsFlipped(!isFlipped)}
+                            mode={mode}
+                        />
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+
+            <div className="flex items-center gap-4">
+                <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handlePrev}
+                    className="rounded-2xl h-14 w-14 p-0 border-stone-200 hover:bg-white hover:text-primary transition-all shadow-sm"
+                >
+                    <ChevronLeft size={24} />
+                </Button>
+
+                <Button
+                    variant="default"
+                    size="lg"
+                    onClick={handleShuffle}
+                    className="rounded-2xl h-14 px-8 bg-primary text-white hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 flex gap-2"
+                >
+                    <Shuffle size={20} /> Xáo trộn
+                </Button>
+
+                <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleReset}
+                    className="rounded-2xl h-14 w-14 p-0 border-stone-200 hover:bg-white hover:text-primary transition-all shadow-sm"
+                >
+                    <RotateCcw size={20} />
+                </Button>
+
+                <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleNext}
+                    className="rounded-2xl h-14 w-14 p-0 border-stone-200 hover:bg-white hover:text-primary transition-all shadow-sm"
+                >
+                    <ChevronRight size={24} />
+                </Button>
+            </div>
+
+            <div className="flex flex-col items-center gap-4 text-stone-400">
+                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                    <Sparkles size={14} className="text-primary" /> Mẹo: Click hoặc nhấn [Dấu cách] để lật, [Mũi tên] để
+                    chuyển thẻ
+                </p>
+            </div>
+        </div>
+    );
+}
+
