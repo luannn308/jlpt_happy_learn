@@ -1,31 +1,32 @@
-# 🌸 JLPT Happy Learn - Ứng dụng học Kanji & Từ vựng Tiếng Nhật
+# 🌸 JLPT Happy Learn - Học Kanji & Từ vựng Tiếng Nhật
 
 ![Banner](https://images.unsplash.com/photo-1528164344705-4754268799af?auto=format&fit=crop&q=80&w=1200&h=400)
 
-**JLPT Happy Learn** là một nền tảng web hiện đại, được thiết kế để giúp người học tiếng Nhật chinh phục Kanji và từ vựng từ cấp độ N5 đến N1 một cách hiệu quả, trực quan và đầy cảm hứng.
+**JLPT Happy Learn** là nền tảng web hiện đại giúp bạn chinh phục kỳ thi JLPT (N5-N1) thông qua trải nghiệm học tập trực quan, mượt mà và đầy cảm hứng. Dự án được xây dựng với triết lý: *"Học mà không áp lực"*.
 
 ---
 
 ## ✨ Tính năng nổi bật
 
-- 🏮 **Học Kanji thông minh**: Hệ thống bài học được phân loại theo cấp độ JLPT, đi kèm bộ thủ, âm Hán Việt, Onyomi và Kunyomi.
-- 📚 **Kho từ vựng khổng lồ**: Danh sách từ vựng phong phú, có ví dụ minh họa và âm thanh bản ngữ.
-- ⚡ **Flashcards & Spaced Repetition**: Áp dụng phương pháp lặp lại ngắt quãng (SRS) giúp ghi nhớ lâu dài.
-- 🏆 **Hệ thống bài kiểm tra (Quick Quizzes)**: Đánh giá trình độ tức thì sau mỗi bài học.
-- 📊 **Theo dõi tiến độ**: Biểu đồ trực quan giúp bạn biết mình đã hoàn thành bao nhiêu % lộ trình.
-- 🌓 **Giao diện cao cấp**: Hỗ trợ Dark Mode, thiết kế tối giản (Minimalism) giúp tập trung tối đa vào việc học.
+- 🏮 **Kanji Interactive Grid**: Danh sách Kanji được trình bày đẹp mắt với các hiệu ứng tương tác cao cấp.
+- 📖 **Chi tiết Kanji chuyên sâu**: Hiển thị đầy đủ Hán Việt, Bộ thủ, Câu chuyện ghi nhớ, Onyomi/Kunyomi và ví dụ minh họa.
+- 📊 **Theo dõi tiến độ thời gian thực**: Thanh tiến độ (Progress Bar) ở Header và Biểu đồ tiến độ (Progress Chart) giúp bạn luôn nắm rõ lộ trình học tập.
+- ✅ **Đánh dấu trạng thái**: Chế độ "Đã thuộc" ngay trên thẻ Kanji giúp bạn tập trung vào những từ mới.
+- ⚡ **Hiệu ứng Micro-animations**: Sử dụng Framer Motion cho các hiệu ứng chuyển cảnh và tương tác mượt mà.
+- 🎨 **Giao diện Rice White & Crimson**: Tone màu truyền thống Nhật Bản, bảo vệ mắt và tăng sự tập trung.
 
 ---
 
 ## 🚀 Công nghệ sử dụng
 
-Dự án được xây dựng với các công nghệ mạnh mẽ và hiện đại nhất:
+Dự án sử dụng các công nghệ Web hiện đại nhất để đảm bảo hiệu năng và trải nghiệm người dùng:
 
-- **Core**: [Next.js 14+](https://nextjs.org/) (App Router)
-- **Styling**: [Vanilla CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) & [Framer Motion](https://www.framer.com/motion/) (cho hiệu ứng mượt mà)
-- **Database**: [MongoDB Atlas](https://www.mongodb.com/atlas/database)
-- **Authentication**: NextAuth.js
-- **State Management**: Zustand
+- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Vanilla CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix UI)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Language**: TypeScript
 
 ---
 
@@ -41,38 +42,40 @@ git clone https://github.com/luannn308/jlpt_happy_learn.git
 npm install
 ```
 
-### 3. Thiết lập biến môi trường
-Tạo file `.env.local` và thêm các thông tin sau:
-```env
-MONGODB_URI=your_mongodb_connection_string
-NEXTAUTH_SECRET=your_secret
-```
-
-### 4. Chạy chế độ Development
+### 3. Chạy chế độ Development
 ```bash
 npm run dev
 ```
-Mở [http://localhost:3000](http://localhost:3000) trên trình duyệt để xem kết quả.
+Mở [http://localhost:3000](http://localhost:3000) trên trình duyệt để bắt đầu học.
 
 ---
 
-## 🎨 Thiết kế & Trải nghiệm người dùng (UX/UI)
+## 🎨 Thiết kế & Trải nghiệm (UX/UI)
 
-Chúng tôi ưu tiên trải nghiệm **"Học mà không áp lực"**:
-- **Tone màu chủ đạo**: 
-  - 🔴 **Traditional Japanese Crimson (#b85c5c)**: Màu đỏ thẫm truyền thống, tạo sự tập trung và sang trọng.
-  - 🍚 **Warm Rice White (#faf9f6)**: Màu trắng gạo ấm giúp bảo vệ mắt khi học lâu.
-  - 🟢 **Success Green (#10b981)**: Màu xanh lục cho các trạng thái hoàn thành.
+Chúng tôi tối ưu hóa từng chi tiết để mang lại cảm giác học tập cao cấp (Premium Experience):
+
+- **Bảng màu (Color Palette)**:
+  - 🍎 **Crimson (#b85c5c)**: Màu đỏ truyền thống, điểm nhấn cho các hành động quan trọng.
+  - 🍚 **Rice White (#faf9f6)**: Màu nền ấm, tinh tế, sang trọng.
+  - 🌿 **Success Green (#10b981)**: Trạng thái hoàn thành/đã thuộc.
 - **Typography**: 
-  - [Be Vietnam Pro](https://fonts.google.com/specimen/Be+Vietnam+Pro) cho giao diện tiếng Việt.
-  - [Noto Sans JP](https://fonts.google.com/specimen/Noto+Sans+JP) cho hiển thị Kanji chuẩn xác.
-- **Hiệu ứng**: Micro-animations và transitions mượt mà (Framer Motion).
+  - **Be Vietnam Pro**: Font chữ hiện đại cho giao diện tiếng Việt.
+  - **Noto Sans JP**: Hiển thị Kanji sắc nét, chuẩn xác.
 
 ---
 
-## 📬 Liên hệ & Đóng góp
+## 🗺️ Lộ trình phát triển (Roadmap)
+
+- [ ] 🔐 Hệ thống đăng nhập và lưu tiến độ cá nhân (NextAuth & MongoDB).
+- [ ] 🗣️ Tích hợp âm thanh bản ngữ cho từ vựng.
+- [ ] 📱 Phiên bản Mobile App.
+- [ ] 🧑‍🏫 Hệ thống ôn tập thông minh (SRS).
+
+---
+
+## 📬 Đóng góp & Liên hệ
 
 Nếu bạn có bất kỳ ý tưởng hoặc phản hồi nào, hãy mở một [Issue](https://github.com/luannn308/jlpt_happy_learn/issues) hoặc tạo một [Pull Request](https://github.com/luannn308/jlpt_happy_learn/pulls).
 
 ---
-*Chúc bạn học tiếng Nhật vui vẻ và đạt kết quả cao trong kỳ thi JLPT sắp tới!* 🇯🇵🔥
+*Chúc bạn chinh phục tiếng Nhật thành công!* 🇯🇵✨

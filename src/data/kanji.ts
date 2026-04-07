@@ -54,9 +54,9 @@ export const kanjiData: KanjiData[] = [
     on: "ガク (gaku)",
     kun: "ひたい (hitai)",
     vocab: [
-      { word: "金額", reading: "きん가く", meaning: "Kim ngạch, số tiền" },
+      { word: "金額", reading: "きんがく", meaning: "Kim ngạch, số tiền" },
       { word: "額", reading: "ひたい", meaning: "Cái trán" },
-      { word: "額縁", reading: "가くぶち", meaning: "Khung tranh" },
+      { word: "額縁", reading: "がくぶち", meaning: "Khung tranh" },
     ],
   },
   {
@@ -89,7 +89,7 @@ export const kanjiData: KanjiData[] = [
   },
   {
     id: 5,
-    kanji: "洁",
+    kanji: "潔",
     han: "KHIẾT",
     components: "Bộ <strong>水</strong> (Nước) + Chữ Khiết (sạch sẽ).",
     story: "Dùng nước tẩy rửa mọi thứ để trở nên tinh <strong>khiết</strong> và sạch sẽ.",
@@ -98,7 +98,7 @@ export const kanjiData: KanjiData[] = [
     vocab: [
       { word: "清潔", reading: "せいけつ", meaning: "Thanh khiết, sạch sẽ" },
       { word: "簡潔", reading: "かんけつ", meaning: "Giản khiết, ngắn gọn" },
-      { word: "潔い", reading: "い사ぎよい", meaning: "Thẳng thắn, hiên ngang" },
+      { word: "潔い", reading: "いさぎよい", meaning: "Thẳng thắn, hiên ngang" },
     ],
   },
   {

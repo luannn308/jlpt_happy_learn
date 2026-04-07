@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Target, Sparkles, BookOpenCheck, Settings } from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Target, Sparkles, BookOpenCheck, Settings, LayoutGrid, Info, Keyboard } from "lucide-react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import ProgressChart from "@/components/kanji/ProgressChart";
 import KanjiGrid from "@/components/kanji/KanjiGrid";
 import KanjiDetail from "@/components/kanji/KanjiDetail";
 import { kanjiData } from "@/data/kanji";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -38,11 +41,18 @@ export default function Home() {
         if (id >= kanjiData.length) id = kanjiData.length - 1;
         setCurrentIndex(id);
 
-        // Auto scroll to detail area
-        const detailElement = document.getElementById("studyArea");
-        if (detailElement) {
-            detailElement.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        // Auto scroll to detail area with offset for header
+        setTimeout(() => {
+            const detailElement = document.getElementById("studyArea");
+            if (detailElement) {
+                const rect = detailElement.getBoundingClientRect();
+                const offset = 100; // Header height + padding
+                window.scrollTo({
+                    top: rect.top + window.scrollY - offset,
+                    behavior: "smooth",
+                });
+            }
+        }, 100);
     }, []);
 
     const toggleLearned = useCallback(() => {
@@ -58,8 +68,14 @@ export default function Home() {
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
             if (currentIndex === null) return;
-            if (e.key === "ArrowLeft") selectKanji(currentIndex - 1);
-            if (e.key === "ArrowRight") selectKanji(currentIndex + 1);
+            if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                selectKanji(currentIndex - 1);
+            }
+            if (e.key === "ArrowRight") {
+                e.preventDefault();
+                selectKanji(currentIndex + 1);
+            }
         },
         [currentIndex, selectKanji],
     );
@@ -69,202 +85,162 @@ export default function Home() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
-    return (
-        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-            <Header />
+    // Calculate total vocabulary
+    const totalVocab = useMemo(() => {
+        return kanjiData.reduce((acc, kanji) => acc + kanji.vocab.length, 0);
+    }, []);
 
-            <main className="container section-padding" style={{ flexGrow: 1 }}>
+    return (
+        <div className="min-h-screen bg-[#fafafa] font-sans text-stone-900 selection:bg-primary/10 selection:text-primary">
+            <Header learnedCount={learned.size} totalCount={kanjiData.length} level="JLPT N3" />
+
+            <main className="container mx-auto px-4 max-w-7xl mt-20">
                 {/* Dashboard Section */}
-                <section
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                        gap: "1.5rem",
-                        marginBottom: "3rem",
-                    }}
-                >
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-16">
                     {/* Welcome Card */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="card"
-                        style={{
-                            gridColumn: "span 2",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            backgroundColor: "var(--white)",
-                            padding: "2rem",
-                            borderRadius: "24px",
-                            border: "1px solid var(--stone-100)",
-                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-                        }}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="lg:col-span-2"
                     >
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-                            <Target size={24} color="var(--primary)" />
-                            <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>Mục tiêu học tập N3</h2>
-                        </div>
-                        <p
-                            style={{
-                                color: "var(--text-dark)",
-                                marginBottom: "1.5rem",
-                                maxWidth: "600px",
-                                fontSize: "1rem",
-                            }}
-                        >
-                            Hôm nay bạn có <strong>10 chữ Kanji mới</strong> cần chinh phục. Mỗi chữ đều đi kèm phân
-                            tích bộ thủ, câu chuyện gợi nhớ và từ vựng thực tế.
-                        </p>
-                        <div style={{ display: "flex", gap: "1.5rem" }}>
-                            <div style={{ display: "flex", flexDirection: "column" }}>
-                                <span
-                                    style={{
-                                        fontSize: "0.625rem",
-                                        fontWeight: 700,
-                                        color: "var(--text-muted)",
-                                        textTransform: "uppercase",
-                                    }}
-                                >
-                                    Tổng số chữ
-                                </span>
-                                <span style={{ fontSize: "1.5rem", fontWeight: 900 }}>10</span>
-                            </div>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    borderLeft: "1px solid var(--stone-100)",
-                                    paddingLeft: "1.5rem",
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        fontSize: "0.625rem",
-                                        fontWeight: 700,
-                                        color: "var(--text-muted)",
-                                        textTransform: "uppercase",
-                                    }}
-                                >
-                                    Từ vựng đi kèm
-                                </span>
-                                <span style={{ fontSize: "1.5rem", fontWeight: 900 }}>31</span>
-                            </div>
-                        </div>
+                        <Card className="h-full border-none shadow-xl shadow-stone-200/40 bg-white rounded-3xl overflow-hidden">
+                            <CardContent className="p-8 md:p-12 flex flex-col justify-center h-full">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                        <Target className="text-primary h-6 w-6" />
+                                    </div>
+                                    <h2 className="text-2xl font-black tracking-tight md:text-3xl">
+                                        Mục tiêu học tập N3
+                                    </h2>
+                                </div>
+
+                                <p className="text-stone-500 text-lg leading-relaxed mb-10 max-w-2xl">
+                                    Hôm nay bạn có{" "}
+                                    <span className="font-bold text-primary italic">10 chữ Kanji mới</span> cần chinh
+                                    phục. Mỗi chữ đều đi kèm phân tích bộ thủ, câu chuyện gợi nhớ và từ vựng thực tế.
+                                    Hãy bắt đầu ngay nhé!
+                                </p>
+
+                                <div className="flex flex-wrap gap-8">
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
+                                            Tổng số chữ
+                                        </span>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-4xl font-black text-stone-900">10</span>
+                                            <span className="text-sm font-bold text-stone-400">KANJI</span>
+                                        </div>
+                                    </div>
+                                    <div className="hidden sm:block w-[1px] bg-stone-100" />
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
+                                            Từ vựng đi kèm
+                                        </span>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-4xl font-black text-stone-900">{totalVocab}</span>
+                                            <span className="text-sm font-bold text-stone-400">TỪ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </motion.div>
 
                     {/* Stats Card */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="card"
-                        style={{
-                            padding: "2rem",
-                            borderRadius: "24px",
-                            backgroundColor: "var(--white)",
-                            border: "1px solid var(--stone-100)",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-                        }}
                     >
-                        <ProgressChart learned={learned.size} total={kanjiData.length} />
+                        <Card className="h-full border-none shadow-xl shadow-stone-200/40 bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center p-8 text-center">
+                            <CardHeader className="p-0 mb-4">
+                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-stone-400">
+                                    Tiến độ hôm nay
+                                </CardTitle>
+                            </CardHeader>
+                            <ProgressChart learned={learned.size} total={kanjiData.length} />
+                        </Card>
                     </motion.div>
-                </section>
+                </div>
 
                 {/* Kanji Selector Grid */}
-                <section style={{ marginBottom: "4rem" }}>
+                <div className="mb-20">
                     <KanjiGrid data={kanjiData} currentIndex={currentIndex} learned={learned} onSelect={selectKanji} />
-                </section>
+                </div>
 
                 {/* Detailed Study Area */}
-                <section
-                    id="studyArea"
-                    style={{ minHeight: "600px", scrollMarginTop: "calc(var(--header-height) + 2rem)" }}
-                >
-                    {currentIndex === null ? (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            style={{
-                                backgroundColor: "var(--white)",
-                                borderRadius: "32px",
-                                padding: "5rem 2rem",
-                                textAlign: "center",
-                                border: "2px dashed var(--stone-200)",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "var(--text-muted)",
-                            }}
-                        >
-                            <div style={{ fontSize: "4rem", opacity: 0.2, marginBottom: "1.5rem" }}>📖</div>
-                            <h3 style={{ fontSize: "1.25rem", fontWeight: 700 }}>
-                                Chọn một chữ Kanji bên trên để bắt đầu học
-                            </h3>
-                            <p style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}>
-                                Sử dụng phím mũi tên để điều hướng nhanh hơn
-                            </p>
-                        </motion.div>
-                    ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "0.5rem",
-                                        fontSize: "1.125rem",
-                                    }}
-                                >
-                                    <Sparkles size={20} color="var(--primary)" />
-                                    Học chi tiết chữ {kanjiData[currentIndex].kanji}
-                                </h3>
-                                <div style={{ display: "flex", gap: "0.75rem" }}>
-                                    <button
-                                        onClick={() => setMasks((prev) => ({ ...prev, reading: !prev.reading }))}
-                                        style={{
-                                            fontSize: "0.75rem",
-                                            fontWeight: 700,
-                                            color: "var(--text-muted)",
-                                            backgroundColor: "var(--stone-100)",
-                                            padding: "0.5rem 0.75rem",
-                                            borderRadius: "8px",
-                                        }}
-                                    >
-                                        {masks.reading ? "Hiện Cách Đọc" : "Ẩn Cách Đọc"}
-                                    </button>
-                                    <button
-                                        onClick={() => setMasks((prev) => ({ ...prev, meaning: !prev.meaning }))}
-                                        style={{
-                                            fontSize: "0.75rem",
-                                            fontWeight: 700,
-                                            color: "var(--text-muted)",
-                                            backgroundColor: "var(--stone-100)",
-                                            padding: "0.5rem 0.75rem",
-                                            borderRadius: "8px",
-                                        }}
-                                    >
-                                        {masks.meaning ? "Hiện Nghĩa" : "Ẩn Nghĩa"}
-                                    </button>
+                <section id="studyArea" className="relative scroll-mt-32 min-h-[600px]">
+                    <AnimatePresence mode="wait">
+                        {currentIndex === null ? (
+                            <motion.div
+                                key="empty"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -30 }}
+                                className="flex flex-col items-center justify-center py-24 px-6 rounded-[3rem] border-2 border-dashed border-stone-200 bg-stone-50/30"
+                            >
+                                <div className="mb-8 p-6 bg-white rounded-full shadow-lg shadow-stone-200/50">
+                                    <LayoutGrid className="h-16 w-16 text-stone-200" />
                                 </div>
-                            </div>
+                                <h3 className="text-2xl font-bold text-stone-600 mb-2">Sẵn sàng vươn tới N3?</h3>
+                                <p className="text-stone-400 font-medium mb-8">
+                                    Chọn một chữ Kanji bên trên để bắt đầu khám phá chi tiết
+                                </p>
 
-                            <KanjiDetail
-                                data={kanjiData[currentIndex]}
-                                currentIndex={currentIndex}
-                                total={kanjiData.length}
-                                isLearned={learned.has(currentIndex)}
-                                masks={masks}
-                                onToggleLearned={toggleLearned}
-                                onNext={() => selectKanji(currentIndex + 1)}
-                                onPrev={() => selectKanji(currentIndex - 1)}
-                            />
-                        </div>
-                    )}
+                                <div className="flex flex-wrap justify-center gap-6 text-stone-400">
+                                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                                        <Keyboard size={16} /> Dùng phím mũi tên để chuyển nhanh
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                                        <Info size={16} /> Click vào từ vựng để ẩn/hiện nghĩa
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="detail"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="space-y-6"
+                            >
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
+                                    <h3 className="flex items-center gap-2 text-lg font-black uppercase tracking-tighter text-stone-800">
+                                        <Sparkles size={20} className="text-primary fill-primary" />
+                                        Học chi tiết chữ {kanjiData[currentIndex].kanji}
+                                    </h3>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            className="rounded-xl font-bold bg-stone-100 hover:bg-stone-200 text-stone-600 border-none"
+                                            onClick={() => setMasks((prev) => ({ ...prev, reading: !prev.reading }))}
+                                        >
+                                            {masks.reading ? "Hiện Cách Đọc" : "Ẩn Cách Đọc"}
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            className="rounded-xl font-bold bg-stone-100 hover:bg-stone-200 text-stone-600 border-none"
+                                            onClick={() => setMasks((prev) => ({ ...prev, meaning: !prev.meaning }))}
+                                        >
+                                            {masks.meaning ? "Hiện Nghĩa" : "Ẩn Nghĩa"}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <KanjiDetail
+                                    data={kanjiData[currentIndex]}
+                                    currentIndex={currentIndex}
+                                    total={kanjiData.length}
+                                    isLearned={learned.has(currentIndex)}
+                                    masks={masks}
+                                    onToggleLearned={toggleLearned}
+                                    onNext={() => selectKanji(currentIndex + 1)}
+                                    onPrev={() => selectKanji(currentIndex - 1)}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </section>
             </main>
 

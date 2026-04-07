@@ -3,68 +3,60 @@
 import React from 'react';
 import { BookOpen, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
-export default function Header() {
+interface HeaderProps {
+  learnedCount?: number;
+  totalCount?: number;
+  level?: string;
+}
+
+export default function Header({ 
+  learnedCount = 0, 
+  totalCount = 1000, 
+  level = "JLPT N3" 
+}: HeaderProps) {
+  const progress = (learnedCount / totalCount) * 100;
+
   return (
-    <header style={{
-      backgroundColor: 'var(--white)',
-      borderBottom: '1px solid var(--stone-200)',
-      padding: '1rem 0',
-      position: 'sticky',
-      top: 0,
-      zIndex: 50
-    }}>
-      <div className="container" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+    <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/80 backdrop-blur-md">
+      <div className="container flex h-16 items-center justify-between py-4">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+          className="flex items-center gap-3"
         >
-          <div style={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--white)',
-            padding: '0.5rem',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <BookOpen size={24} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+            <BookOpen size={22} />
           </div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.025em' }}>
-            JLPT <span style={{ color: 'var(--primary)' }}>Happy Learn</span> Mara
-          </h1>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-stone-900 line-clamp-1">
+              JLPT <span className="text-primary italic">Happy</span> Learn
+            </h1>
+          </div>
         </motion.div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ textAlign: 'right', display: 'none' /* Show on md+ */ }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+        <div className="flex items-center gap-4 md:gap-8">
+          <div className="hidden flex-col items-end sm:flex">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
               Trình độ hiện tại
             </span>
-            <div style={{ fontWeight: 700, color: 'var(--primary)' }}>JLPT N3</div>
+            <Badge variant="outline" className="border-primary/30 text-primary font-bold px-2 py-0">
+              {level}
+            </Badge>
           </div>
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            style={{
-              backgroundColor: 'var(--primary-light)',
-              color: 'var(--primary)',
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.875rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              border: '1px solid var(--primary)'
-            }}
-          >
-            <Award size={18} />
-            <span>0 / 1000 Kanji</span>
-          </motion.div>
+
+          <div className="flex flex-col gap-1.5 min-w-[120px] md:min-w-[180px]">
+            <div className="flex items-center justify-between text-xs font-bold text-stone-600">
+              <div className="flex items-center gap-1.5">
+                <Award size={14} className="text-primary" />
+                <span>Hoàn thành</span>
+              </div>
+              <span className="text-primary font-mono">{learnedCount}/{totalCount}</span>
+            </div>
+            <Progress value={progress} className="h-1.5 bg-stone-100" />
+          </div>
         </div>
       </div>
     </header>

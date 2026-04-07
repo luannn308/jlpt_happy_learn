@@ -15,16 +15,17 @@ export default function ProgressChart({ learned, total }: ProgressChartProps) {
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div style={{ position: 'relative', width: '150px', height: '150px' }}>
-      <svg width="150" height="150" viewBox="0 0 100 100">
+    <div className="relative h-40 w-40 flex items-center justify-center">
+      <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
         {/* Background Circle */}
         <circle
           cx="50"
           cy="50"
           r={radius}
           fill="transparent"
-          stroke="var(--stone-100)"
+          stroke="currentColor"
           strokeWidth="8"
+          className="text-stone-100"
         />
         {/* Progress Circle */}
         <motion.circle
@@ -32,30 +33,29 @@ export default function ProgressChart({ learned, total }: ProgressChartProps) {
           cy="50"
           r={radius}
           fill="transparent"
-          stroke="var(--success)"
+          stroke="currentColor"
           strokeWidth="8"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
           strokeLinecap="round"
-          style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
+          className="text-green-500"
         />
       </svg>
+      
       {/* Center Text */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        textAlign: 'center'
-      }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-dark)' }}>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <motion.span 
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-4xl font-black text-stone-900"
+        >
           {learned}
-        </div>
-        <div style={{ fontSize: '0.625rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        </motion.span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
           Đã thuộc
-        </div>
+        </span>
       </div>
     </div>
   );

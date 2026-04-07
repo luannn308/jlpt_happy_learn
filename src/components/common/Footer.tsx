@@ -1,35 +1,27 @@
 import React from 'react';
 
+const jlptLevels = ["N5", "N4", "N3", "N2", "N1"];
+
 export default function Footer() {
   return (
-    <footer style={{
-      marginTop: '5rem',
-      padding: '2.5rem 0',
-      borderTop: '1px solid var(--stone-200)',
-      textAlign: 'center'
-    }}>
-      <div className="container">
-        <p style={{
-          color: 'var(--text-muted)',
-          fontSize: '0.875rem',
-          fontWeight: 500
-        }}>
-          Học Kanji qua trải nghiệm tương tác - Dự án JLPT Happy Learn
+    <footer className="mt-20 border-t border-stone-200 py-10 bg-white/40">
+      <div className="container px-4 text-center">
+        <p className="text-sm font-medium text-stone-500">
+          Học Kanji qua trải nghiệm tương tác - Dự án <span className="text-primary font-bold">JLPT Happy Learn</span>
         </p>
-        <div style={{
-          marginTop: '0.75rem',
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '1rem',
-          fontSize: '0.75rem',
-          color: '#cbd5e0'
-        }}>
-          <span>N5</span>
-          <span>N4</span>
-          <span style={{ color: 'var(--primary)', fontWeight: 700 }}>N3</span>
-          <span>N2</span>
-          <span>N1</span>
+        <div className="mt-6 flex items-center justify-center gap-3 text-xs font-semibold tracking-wider text-stone-300">
+          {jlptLevels.map((level) => (
+            <span 
+              key={level} 
+              className={level === "N3" ? "text-primary font-bold bg-primary/10 px-2 py-1 rounded" : ""}
+            >
+              {level}
+            </span>
+          ))}
         </div>
+        <p className="mt-8 text-[10px] uppercase tracking-widest text-stone-300">
+          © 2024 JLPT Happy Learn Mara. All rights reserved.
+        </p>
       </div>
     </footer>
   );
