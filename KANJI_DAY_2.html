@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Học 10 Kanji N3 - Phiên Bản 10 Chữ Mới</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Be+Vietnam+Pro:wght@300;400;600;700&display=swap");
+
+            :root {
+                --primary: #b85c5c;
+                --primary-light: #fdf2f2;
+                --success: #10b981;
+                --bg-warm: #faf9f6;
+            }
+
+            body {
+                font-family: "Be Vietnam Pro", sans-serif;
+                background-color: var(--bg-warm);
+                color: #2d3748;
+            }
+
+            .kanji-font {
+                font-family: "Noto Sans JP", sans-serif;
+            }
+
+            .chart-container {
+                position: relative;
+                width: 100%;
+                max-width: 320px;
+                margin: auto;
+                height: 200px;
+            }
+
+            .kanji-card {
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .kanji-card.active {
+                border-color: var(--primary);
+                background-color: var(--primary-light);
+                transform: scale(1.05);
+                z-index: 10;
+            }
+
+            .kanji-card.learned {
+                position: relative;
+            }
+
+            .kanji-card.learned::after {
+                content: "✓";
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background: var(--success);
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+
+            .hide-content {
+                filter: blur(4px);
+                background-color: #edf2f7;
+                color: transparent !important;
+                user-select: none;
+                cursor: pointer;
+                transition: filter 0.2s;
+            }
+
+            .hide-content:hover {
+                filter: blur(2px);
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .animate-fade {
+                animation: fadeIn 0.4s ease-out forwards;
+            }
+        </style>
+    </head>
+    <body class="antialiased min-h-screen">
+        <!-- Chosen Palette: Traditional Japanese Crimson (#b85c5c), Warm Rice White (#faf9f6), Success Green (#10b981) -->
+        <!-- Application Structure Plan: Cấu trúc ứng dụng được giữ nguyên theo dạng Dashboard tích hợp cho bộ 10 chữ mới. 
+         Các chữ Kanji được cập nhật thành: 混, 警, 額, 価, 営, 潔, 授, 史, 桜, 舎.
+         Mỗi chữ đi kèm phân tích bộ thủ, câu chuyện ghi nhớ và 3-4 từ vựng N3 trọng tâm. -->
+        <!-- Visualization & Content Choices: 
+         - Doughnut Chart: Theo dõi 10 chữ mới.
+         - Kanji Grid: Điều hướng nhanh giữa các chữ mới.
+         - Interactive Masks: Hỗ trợ Active Recall cho từ vựng mới. -->
+        <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+        <header class="bg-white border-b border-stone-200 py-4 sticky top-0 z-50">
+            <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-[#b85c5c] text-white p-2 rounded-lg kanji-font text-xl font-bold">混</div>
+                    <h1 class="text-xl font-bold tracking-tight text-stone-800">
+                        Kanji Mastery <span class="text-[#b85c5c]">N3</span>
+                    </h1>
+                </div>
+                <div id="overallProgress" class="text-sm font-medium text-stone-500">
+                    Tiến độ: <span id="progressText" class="text-[#b85c5c]">0/10</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-5xl mx-auto px-4 py-8">
+            <!-- Dashboard Section -->
+            <section class="grid md:grid-cols-12 gap-6 mb-12">
+                <div
+                    class="md:col-span-8 bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col justify-center"
+                >
+                    <h2 class="text-lg font-bold mb-3 flex items-center gap-2">🎯 Mục tiêu học tập mới</h2>
+                    <p class="text-stone-600 mb-6">
+                        Học 10 chữ Kanji N3: <strong>Hỗn, Cảnh, Ngạch, Giá, Doanh, Khiết, Thụ, Sử, Anh, Xá</strong>. Mỗi
+                        chữ đều được phân tích kỹ lưỡng để bạn ghi nhớ sâu thông qua câu chuyện và ứng dụng thực tế.
+                    </p>
+                    <div class="flex gap-4">
+                        <div class="bg-stone-50 p-4 rounded-xl flex-1 border border-stone-100">
+                            <span class="text-xs uppercase tracking-wider text-stone-400 font-bold block mb-1"
+                                >Tổng Kanji</span
+                            >
+                            <span class="text-2xl font-bold">10</span>
+                        </div>
+                        <div class="bg-stone-50 p-4 rounded-xl flex-1 border border-stone-100">
+                            <span class="text-xs uppercase tracking-wider text-stone-400 font-bold block mb-1"
+                                >Từ vựng đi kèm</span
+                            >
+                            <span class="text-2xl font-bold" id="vocabCount">31</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="md:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col items-center"
+                >
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Kanji Grid Selection -->
+            <section class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-stone-800">Danh sách 10 chữ mới</h3>
+                    <span class="text-xs text-stone-400 font-medium italic">* Nhấp để chọn</span>
+                </div>
+                <div class="grid grid-cols-5 md:grid-cols-10 gap-3" id="kanjiGrid">
+                    <!-- JS Populated -->
+                </div>
+            </section>
+
+            <!-- Detail Study Area -->
+            <section id="studyArea" class="relative min-h-[500px]">
+                <!-- Empty State -->
+                <div
+                    id="emptyState"
+                    class="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-stone-200 flex flex-col items-center"
+                >
+                    <div class="text-6xl mb-4 opacity-20">📖</div>
+                    <h3 class="text-xl font-bold text-stone-400">Chọn một chữ Kanji trong bộ 10 chữ mới để bắt đầu</h3>
+                </div>
+
+                <!-- Detail View -->
+                <div id="detailContainer" class="hidden opacity-0">
+                    <div class="bg-white rounded-3xl shadow-xl border border-stone-100 overflow-hidden">
+                        <div class="flex flex-col lg:flex-row">
+                            <!-- Left Panel: The Kanji -->
+                            <div
+                                class="lg:w-1/3 bg-stone-50 p-10 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-stone-100 relative"
+                            >
+                                <div
+                                    class="text-[140px] kanji-font font-black leading-none text-stone-800 mb-4"
+                                    id="viewKanji"
+                                ></div>
+                                <div class="text-3xl font-bold text-[#b85c5c] mb-6" id="viewHan"></div>
+
+                                <div class="w-full space-y-3">
+                                    <div class="bg-white p-3 rounded-xl border border-stone-200">
+                                        <label class="text-[10px] uppercase font-bold text-stone-400 block mb-1"
+                                            >Âm On (Kunyomi)</label
+                                        >
+                                        <div class="font-bold kanji-font text-stone-700" id="viewOn"></div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-xl border border-stone-200">
+                                        <label class="text-[10px] uppercase font-bold text-stone-400 block mb-1"
+                                            >Âm Kun (Onyomi)</label
+                                        >
+                                        <div class="font-bold kanji-font text-stone-700" id="viewKun"></div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    id="masteredBtn"
+                                    class="mt-8 w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border-2"
+                                >
+                                    <span>Đã thuộc chữ này</span>
+                                </button>
+                            </div>
+
+                            <!-- Right Panel: Info & Vocab -->
+                            <div class="lg:w-2/3 p-8 lg:p-12">
+                                <div class="mb-10">
+                                    <h4
+                                        class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 flex items-center gap-2"
+                                    >
+                                        <span class="w-2 h-2 bg-[#b85c5c] rounded-full"></span> Cấu tạo & Ghi nhớ
+                                    </h4>
+                                    <div class="bg-stone-50 p-5 rounded-2xl mb-4 border border-stone-100">
+                                        <p class="text-stone-700 leading-relaxed" id="viewComponents"></p>
+                                    </div>
+                                    <div class="relative bg-[#fdf2f2] p-6 rounded-2xl border border-[#f5e6e6]">
+                                        <span
+                                            class="absolute -top-3 left-6 bg-[#b85c5c] text-white text-[10px] px-2 py-1 rounded font-bold"
+                                            >CÂU CHUYỆN</span
+                                        >
+                                        <p class="text-lg italic text-stone-800 leading-relaxed" id="viewStory"></p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h4
+                                            class="text-sm font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2"
+                                        >
+                                            <span class="w-2 h-2 bg-[#b85c5c] rounded-full"></span> Từ vựng N3 trọng tâm
+                                        </h4>
+                                        <div class="flex gap-2">
+                                            <button
+                                                onclick="toggleMask('meaning')"
+                                                class="text-[10px] bg-stone-100 hover:bg-stone-200 px-2 py-1 rounded font-bold text-stone-600 transition-colors"
+                                            >
+                                                Ẩn/Hiện Nghĩa
+                                            </button>
+                                            <button
+                                                onclick="toggleMask('reading')"
+                                                class="text-[10px] bg-stone-100 hover:bg-stone-200 px-2 py-1 rounded font-bold text-stone-600 transition-colors"
+                                            >
+                                                Ẩn/Hiện Cách Đọc
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-4" id="viewVocabGrid">
+                                        <!-- JS Populated -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Navigation -->
+                        <div class="bg-stone-50 border-t border-stone-100 p-4 flex justify-between items-center">
+                            <button
+                                id="prevBtn"
+                                class="flex items-center gap-2 text-stone-500 hover:text-[#b85c5c] font-bold transition-colors"
+                            >
+                                ← Quay lại
+                            </button>
+                            <span class="text-xs font-bold text-stone-300 uppercase tracking-widest" id="pageIndicator"
+                                >KANJI 1 / 10</span
+                            >
+                            <button
+                                id="nextBtn"
+                                class="flex items-center gap-2 text-stone-500 hover:text-[#b85c5c] font-bold transition-colors"
+                            >
+                                Tiếp theo →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-20 py-10 border-t border-stone-200">
+            <div class="max-w-5xl mx-auto px-4 text-center">
+                <p class="text-stone-400 text-sm">Học Kanji qua trải nghiệm tương tác - Bản cập nhật 10 từ mới</p>
+            </div>
+        </footer>
+
+        <script>
+            const kanjiData = [
+                {
+                    id: 0,
+                    kanji: "混",
+                    han: "HỖN",
+                    components: "Bộ <strong>水</strong> (Thủy - nước) + <strong>昆</strong> (Côn - bọ/côn trùng).",
+                    story: "Nước hòa lẫn với côn trùng tạo thành một mớ <strong>hỗn</strong> tạp.",
+                    on: "コン (kon)",
+                    kun: "ま・じる, ま・ざる, ま・ぜる",
+                    vocab: [
+                        { word: "混雑", reading: "こんざつ", meaning: "Hỗn tạp, tắc nghẽn" },
+                        { word: "混乱", reading: "こんらん", meaning: "Hỗn loạn" },
+                        { word: "混ぜる", reading: "まぜる", meaning: "Trộn, trộn lẫn" },
+                        { word: "混じる", reading: "まじる", meaning: "Bị lẫn vào" },
+                    ],
+                },
+                {
+                    id: 1,
+                    kanji: "警",
+                    han: "CẢNH",
+                    components: "Bộ <strong>敬</strong> (Kính - tôn trọng) + <strong>言</strong> (Ngôn - lời nói).",
+                    story: "Dùng lời nói kính trọng để <strong>cảnh</strong> báo cấp trên về nguy hiểm.",
+                    on: "ケイ (kei)",
+                    kun: "Không có",
+                    vocab: [
+                        { word: "警察", reading: "けいさつ", meaning: "Cảnh sát" },
+                        { word: "警告", reading: "けいこく", meaning: "Cảnh báo" },
+                        { word: "警備", reading: "けいび", meaning: "Cảnh bị, bảo vệ" },
+                    ],
+                },
+                {
+                    id: 2,
+                    kanji: "額",
+                    han: "NGẠCH",
+                    components: "Bộ <strong>客</strong> (Khách) + <strong>頁</strong> (Hiệt - đầu).",
+                    story: "Vị khách có cái đầu với cái trán (<strong>ngạch</strong>) rất cao.",
+                    on: "ガク (gaku)",
+                    kun: "ひたい (hitai)",
+                    vocab: [
+                        { word: "金額", reading: "きんがく", meaning: "Kim ngạch, số tiền" },
+                        { word: "額", reading: "ひたい", meaning: "Cái trán" },
+                        { word: "額縁", reading: "がくぶち", meaning: "Khung tranh" },
+                    ],
+                },
+                {
+                    id: 3,
+                    kanji: "価",
+                    han: "GIÁ",
+                    components: "Bộ <strong>人</strong> (Nhân - người) + Chữ Á (thứ hai).",
+                    story: "Con người đánh <strong>giá</strong> mọi vật dựa trên giá trị của chúng.",
+                    on: "カ (ka)",
+                    kun: "あたい (atai)",
+                    vocab: [
+                        { word: "価格", reading: "かかく", meaning: "Giá cả" },
+                        { word: "価値", reading: "かち", meaning: "Giá trị" },
+                        { word: "物価", reading: "ぶっか", meaning: "Vật giá" },
+                    ],
+                },
+                {
+                    id: 4,
+                    kanji: "営",
+                    han: "DOANH",
+                    components: "Bộ <strong>宮</strong> (Cung - tòa nhà) nhưng lược bớt + Lửa (ánh đèn).",
+                    story: "Tòa nhà thắp đèn sáng rực để <strong>doanh</strong> nghiệp hoạt động suốt đêm.",
+                    on: "エイ (ei)",
+                    kun: "いとな・む",
+                    vocab: [
+                        { word: "営業", reading: "えいぎょう", meaning: "Kinh doanh" },
+                        { word: "運営", reading: "うんえい", meaning: "Vận hành, quản lý" },
+                        { word: "営む", reading: "いとなむ", meaning: "Kinh doanh, điều hành" },
+                    ],
+                },
+                {
+                    id: 5,
+                    kanji: "潔",
+                    han: "KHIẾT",
+                    components: "Bộ <strong>水</strong> (Nước) + Chữ Khiết (sạch sẽ).",
+                    story: "Dùng nước tẩy rửa mọi thứ để trở nên tinh <strong>khiết</strong> và sạch sẽ.",
+                    on: "ケツ (ketsu)",
+                    kun: "いさぎよ・い",
+                    vocab: [
+                        { word: "清潔", reading: "せいけつ", meaning: "Thanh khiết, sạch sẽ" },
+                        { word: "簡潔", reading: "かんけつ", meaning: "Giản khiết, ngắn gọn" },
+                        { word: "潔い", reading: "いさぎよい", meaning: "Thẳng thắn, hiên ngang" },
+                    ],
+                },
+                {
+                    id: 6,
+                    kanji: "授",
+                    han: "THỤ",
+                    components: "Bộ <strong>扌</strong> (Thủ - tay) + <strong>受</strong> (Thụ - nhận).",
+                    story: "Dùng tay truyền <strong>thụ</strong> kiến thức cho người sẵn sàng tiếp nhận.",
+                    on: "ジュ (ju)",
+                    kun: "さず・ける",
+                    vocab: [
+                        { word: "授業", reading: "じゅぎょう", meaning: "Tiết học, giờ học" },
+                        { word: "教授", reading: "きょうじゅ", meaning: "Giáo sư" },
+                        { word: "授ける", reading: "さずける", meaning: "Ban tặng, truyền thụ" },
+                    ],
+                },
+                {
+                    id: 7,
+                    kanji: "史",
+                    han: "SỬ",
+                    components: "Miệng + Bàn tay cầm bút ghi chép.",
+                    story: "Ghi chép lại lời nói của con người qua các đời thành lịch <strong>sử</strong>.",
+                    on: "シ (shi)",
+                    kun: "Không có",
+                    vocab: [
+                        { word: "歴史", reading: "れきし", meaning: "Lịch sử" },
+                        { word: "世界史", reading: "せかいし", meaning: "Lịch sử thế giới" },
+                        { word: "日本史", reading: "にほんし", meaning: "Lịch sử Nhật Bản" },
+                    ],
+                },
+                {
+                    id: 8,
+                    kanji: "桜",
+                    han: "ANH",
+                    components:
+                        "Bộ <strong>木</strong> (Mộc - cây) + <strong>女</strong> (Nữ) + <strong>ツ</strong> (Mũ/Hoa).",
+                    story: "Cây có hoa đẹp như người thiếu nữ đội mũ hoa chính là cây hoa <strong>anh</strong> đào.",
+                    on: "オウ (ou)",
+                    kun: "さくら (sakura)",
+                    vocab: [
+                        { word: "桜", reading: "さくら", meaning: "Hoa anh đào" },
+                        { word: "桜前線", reading: "さくらぜんせん", meaning: "Biểu đồ hoa anh đào nở" },
+                        { word: "桜色", reading: "さくらいろ", meaning: "Màu hồng đào" },
+                    ],
+                },
+                {
+                    id: 9,
+                    kanji: "舎",
+                    han: "XÁ",
+                    components:
+                        "<strong>人</strong> (Nhân - người) + <strong>土</strong> (Thổ - đất) + <strong>口</strong> (Khẩu - miệng).",
+                    story: "Nơi con người tụ tập nói chuyện trên mảnh đất có mái che là quán <strong>xá</strong>.",
+                    on: "シャ (sha)",
+                    kun: "Không có",
+                    vocab: [
+                        { word: "田舎", reading: "いなか", meaning: "Nông thôn, quê" },
+                        { word: "宿舎", reading: "しゅくしゃ", meaning: "Ký túc xá, chỗ trọ" },
+                        { word: "校舎", reading: "こうしゃ", meaning: "Tòa nhà trường học" },
+                    ],
+                },
+            ];
+
+            let state = {
+                currentIndex: null,
+                learned: new Set(),
+                masks: { reading: false, meaning: false },
+            };
+
+            let myChart;
+
+            function init() {
+                renderGrid();
+                initChart();
+                setupNav();
+                updateStats();
+            }
+
+            function renderGrid() {
+                const grid = document.getElementById("kanjiGrid");
+                grid.innerHTML = kanjiData
+                    .map(
+                        (item) => `
+                <button onclick="selectKanji(${item.id})" id="grid-btn-${item.id}"
+                    class="kanji-card aspect-square flex flex-col items-center justify-center bg-white border border-stone-200 rounded-xl hover:shadow-md ${state.learned.has(item.id) ? "learned" : ""} ${state.currentIndex === item.id ? "active" : ""}">
+                    <span class="text-2xl font-bold kanji-font">${item.kanji}</span>
+                    <span class="text-[10px] text-stone-400 font-bold">${item.han}</span>
+                </button>
+            `,
+                    )
+                    .join("");
+            }
+
+            function selectKanji(index) {
+                if (index < 0 || index >= kanjiData.length) return;
+
+                state.currentIndex = index;
+                const data = kanjiData[index];
+
+                document.getElementById("emptyState").classList.add("hidden");
+                const detail = document.getElementById("detailContainer");
+                detail.classList.remove("hidden");
+                detail.classList.remove("opacity-0");
+                detail.classList.add("animate-fade");
+
+                // Fill Info
+                document.getElementById("viewKanji").innerText = data.kanji;
+                document.getElementById("viewHan").innerText = data.han;
+                document.getElementById("viewOn").innerText = data.on;
+                document.getElementById("viewKun").innerText = data.kun;
+                document.getElementById("viewComponents").innerHTML = data.components;
+                document.getElementById("viewStory").innerHTML = data.story;
+                document.getElementById("pageIndicator").innerText = `KANJI ${index + 1} / 10`;
+
+                renderVocab(data.vocab);
+                updateMasterBtn();
+                renderGrid();
+            }
+
+            function renderVocab(vocabs) {
+                const grid = document.getElementById("viewVocabGrid");
+                grid.innerHTML = vocabs
+                    .map(
+                        (v) => `
+                <div class="bg-white p-4 rounded-xl border border-stone-100 shadow-sm flex flex-col justify-center">
+                    <div class="flex justify-between items-center border-b border-stone-50 pb-2 mb-2">
+                        <span class="text-xl font-bold text-[#b85c5c] kanji-font">${v.word}</span>
+                        <span class="text-xs font-semibold text-stone-400 ${state.masks.reading ? "hide-content" : ""}" onclick="this.classList.toggle('hide-content')">${v.reading}</span>
+                    </div>
+                    <span class="text-sm text-stone-600 font-medium ${state.masks.meaning ? "hide-content" : ""}" onclick="this.classList.toggle('hide-content')">${v.meaning}</span>
+                </div>
+            `,
+                    )
+                    .join("");
+            }
+
+            function updateMasterBtn() {
+                const btn = document.getElementById("masteredBtn");
+                const isLearned = state.learned.has(state.currentIndex);
+
+                if (isLearned) {
+                    btn.className =
+                        "mt-8 w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border-2 border-emerald-500 bg-emerald-50 text-emerald-600";
+                    btn.innerHTML = "<span>★ Đã thuộc chữ này</span>";
+                } else {
+                    btn.className =
+                        "mt-8 w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border-2 border-stone-200 bg-white text-stone-400 hover:border-[#b85c5c] hover:text-[#b85c5c]";
+                    btn.innerHTML = "<span>Đánh dấu đã thuộc</span>";
+                }
+
+                btn.onclick = () => {
+                    if (isLearned) state.learned.delete(state.currentIndex);
+                    else state.learned.add(state.currentIndex);
+                    updateMasterBtn();
+                    renderGrid();
+                    updateStats();
+                };
+            }
+
+            function toggleMask(type) {
+                state.masks[type] = !state.masks[type];
+                renderVocab(kanjiData[state.currentIndex].vocab);
+            }
+
+            function setupNav() {
+                document.getElementById("prevBtn").onclick = () => selectKanji(state.currentIndex - 1);
+                document.getElementById("nextBtn").onclick = () => selectKanji(state.currentIndex + 1);
+
+                // Keyboard nav
+                document.addEventListener("keydown", (e) => {
+                    if (state.currentIndex === null) return;
+                    if (e.key === "ArrowLeft") selectKanji(state.currentIndex - 1);
+                    if (e.key === "ArrowRight") selectKanji(state.currentIndex + 1);
+                });
+            }
+
+            function updateStats() {
+                const learnedCount = state.learned.size;
+                document.getElementById("progressText").innerText = `${learnedCount}/10`;
+                if (myChart) {
+                    myChart.data.datasets[0].data = [learnedCount, 10 - learnedCount];
+                    myChart.update();
+                }
+            }
+
+            function initChart() {
+                const ctx = document.getElementById("mainChart").getContext("2d");
+                myChart = new Chart(ctx, {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Đã thuộc", "Chưa thuộc"],
+                        datasets: [
+                            {
+                                data: [0, 10],
+                                backgroundColor: ["#10b981", "#f1f1f1"],
+                                borderWidth: 0,
+                                hoverOffset: 0,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: "80%",
+                        plugins: { legend: { display: false } },
+                    },
+                });
+            }
+
+            window.onload = init;
+        </script>
+    </body>
+</html>
