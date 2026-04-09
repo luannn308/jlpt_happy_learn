@@ -46,15 +46,18 @@ export default function ProgressChart({ learned, total }: ProgressChartProps) {
       
       {/* Center Text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <motion.span 
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-4xl font-black text-stone-900"
-        >
-          {learned}
-        </motion.span>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
-          Đã thuộc
+        <div className="flex flex-baseline items-baseline justify-center">
+          <motion.span 
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-4xl font-black text-stone-900"
+          >
+            {learned}
+          </motion.span>
+          <span className="text-xl font-bold text-stone-300 ml-0.5">/{total}</span>
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 Vietnamese-Content">
+          Tiến độ học
         </span>
       </div>
     </div>

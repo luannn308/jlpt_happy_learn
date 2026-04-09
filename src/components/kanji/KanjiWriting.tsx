@@ -113,7 +113,7 @@ export default function KanjiWriting() {
             }, 1000);
         } else {
             setIsCorrect(false);
-            setPenaltyTimer(5);
+            setPenaltyTimer(2);
             setShowAnswer(true);
             setTotalAttempted((prev) => prev + 1);
 

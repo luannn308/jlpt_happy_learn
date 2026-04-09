@@ -31,6 +31,8 @@ interface Question {
     questionText: string;
     correctAnswer: string;
     options: string[];
+    reading?: string; // Thêm cách đọc
+    han?: string;     // Thêm âm Hán
 }
 
 export default function KanjiQuiz() {
@@ -263,6 +265,13 @@ export default function KanjiQuiz() {
             questionText,
             correctAnswer,
             options: options.sort(() => Math.random() - 0.5),
+            reading:
+                type === "vocab-reading" || type === "vocab-meaning"
+                    ? kanji.vocab.find((v) => v.word === questionText)?.reading || ""
+                    : kanji.on !== "Không có"
+                      ? kanji.on
+                      : kanji.kun,
+            han: kanji.han,
         };
     };
 
@@ -289,10 +298,10 @@ export default function KanjiQuiz() {
                 setScore((prev) => prev + 1);
             }
 
-            // Auto-next after 600ms
-            setTimeout(() => {
-                nextQuestion();
-            }, 600);
+            // Auto-next after 600ms disabled by user request
+            // setTimeout(() => {
+            //     nextQuestion();
+            // }, 600);
         } else {
             playSFX("wrong");
             // Wrong answer logic
@@ -535,13 +544,41 @@ export default function KanjiQuiz() {
                                 </span>
                                 <h2
                                     className={cn(
-                                        "font-black text-stone-900 leading-tight",
+                                        "font-black text-stone-900 leading-tight flex flex-col items-center justify-center gap-4",
                                         currentQuestion.type === "face"
                                             ? "text-4xl md:text-6xl Vietnamese-Content"
                                             : "text-5xl md:text-8xl font-kanji",
                                     )}
                                 >
-                                    {currentQuestion.questionText}
+                                    {isAnswered &&
+                                    selectedAnswer === currentQuestion.correctAnswer &&
+                                    (currentQuestion.type === "vocab-meaning" || currentQuestion.type === "han-viet") ? (
+                                        <ruby className="ruby-position-over">
+                                            {currentQuestion.questionText}
+                                            <rt className="text-primary text-xl md:text-2xl font-bold mb-2 lowercase tracking-normal">
+                                                {currentQuestion.reading}
+                                            </rt>
+                                        </ruby>
+                                    ) : (
+                                        currentQuestion.questionText
+                                    )}
+
+                                    {/* Hiển thị Âm Hán Việt khi chọn đúng */}
+                                    {isAnswered &&
+                                        selectedAnswer === currentQuestion.correctAnswer &&
+                                        currentQuestion.han &&
+                                        (currentQuestion.type === "vocab-meaning" ||
+                                            currentQuestion.type === "vocab-reading" ||
+                                            currentQuestion.type === "on-yomi" ||
+                                            currentQuestion.type === "kun-yomi") && (
+                                            <motion.span
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="text-primary/60 text-lg md:text-xl font-bold uppercase tracking-widest block"
+                                            >
+                                                {currentQuestion.han}
+                                            </motion.span>
+                                        )}
                                 </h2>
                             </div>
 
@@ -590,8 +627,23 @@ export default function KanjiQuiz() {
                                 ))}
                             </div>
 
-                            {/* Feedback message for wrong answer */}
-                            <div className="min-h-[40px] flex items-center justify-center">
+                            {/* Feedback message & Next Button */}
+                            <div className="min-h-[60px] flex flex-col items-center justify-center gap-4">
+                                {isAnswered && selectedAnswer === currentQuestion.correctAnswer && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="w-full flex flex-col items-center gap-4"
+                                    >
+                                        <Button
+                                            onClick={nextQuestion}
+                                            size="lg"
+                                            className="bg-green-500 hover:bg-green-600 text-white rounded-2xl h-14 px-10 font-bold flex gap-2 shadow-lg shadow-green-200 transition-all hover:scale-105 active:scale-95 Vietnamese-Content"
+                                        >
+                                            Tiếp tục <ArrowRight size={20} />
+                                        </Button>
+                                    </motion.div>
+                                )}
                                 {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 10 }}

@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, RotateCcw, Home, CheckCircle2, XCircle, BrainCircuit, Volume2, VolumeX } from "lucide-react";
+import { Sparkles, ArrowRight, RotateCcw, Home, CheckCircle2, XCircle, BrainCircuit, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +21,8 @@ interface VocabQuestion {
     questionText: string;
     correctAnswer: string;
     options: string[];
+    reading?: string; // Thêm cách đọc
+    han?: string;     // Thêm âm Hán
 }
 
 export default function VocabQuiz() {
@@ -131,6 +133,8 @@ export default function VocabQuiz() {
             questionText,
             correctAnswer,
             options: options.sort(() => Math.random() - 0.5),
+            reading: vocab.reading,
+            han: vocab.han,
         };
     }, []);
 
@@ -190,10 +194,10 @@ export default function VocabQuiz() {
                 setScore((prev) => prev + 1);
             }
 
-            // Auto-next
-            setTimeout(() => {
-                nextQuestion();
-            }, 600);
+            // Auto-next disabled by user request to allow reading furigana/han-viet
+            // setTimeout(() => {
+            //     nextQuestion();
+            // }, 600);
         } else {
             playSFX("wrong");
             setHasFailedCurrent(true);
@@ -392,10 +396,30 @@ export default function VocabQuiz() {
                                     {currentQuestion.type === "word-to-reading" && "Cách đọc của từ này là gì?"}
                                 </span>
                                 <h2 className={cn(
-                                    "font-black text-stone-900 leading-tight",
+                                    "font-black text-stone-900 leading-tight flex flex-col items-center justify-center gap-4",
                                     currentQuestion.type === "meaning-to-word" ? "text-4xl md:text-6xl Vietnamese-Content" : "text-5xl md:text-8xl font-kanji"
                                 )}>
-                                    {currentQuestion.questionText}
+                                    {isAnswered && selectedAnswer === currentQuestion.correctAnswer && currentQuestion.type !== "meaning-to-word" ? (
+                                        <ruby className="ruby-position-over">
+                                            {currentQuestion.questionText}
+                                            <rt className="text-primary text-xl md:text-2xl font-bold mb-2 lowercase tracking-normal">
+                                                {currentQuestion.reading}
+                                            </rt>
+                                        </ruby>
+                                    ) : (
+                                        currentQuestion.questionText
+                                    )}
+
+                                    {/* Hiển thị Âm Hán Việt khi chọn đúng */}
+                                    {isAnswered && selectedAnswer === currentQuestion.correctAnswer && currentQuestion.han && (
+                                        <motion.span
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="text-primary/60 text-lg md:text-xl font-bold uppercase tracking-widest block"
+                                        >
+                                            {currentQuestion.han}
+                                        </motion.span>
+                                    )}
                                 </h2>
                             </div>
 
@@ -439,8 +463,23 @@ export default function VocabQuiz() {
                                 ))}
                             </div>
 
-                            {/* Feedback message */}
-                            <div className="min-h-[40px] flex items-center justify-center">
+                            {/* Feedback message & Next Button */}
+                            <div className="min-h-[60px] flex flex-col items-center justify-center gap-4">
+                                {isAnswered && selectedAnswer === currentQuestion.correctAnswer && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="w-full flex flex-col items-center gap-4"
+                                    >
+                                        <Button
+                                            onClick={nextQuestion}
+                                            size="lg"
+                                            className="bg-green-500 hover:bg-green-600 text-white rounded-2xl h-14 px-10 font-bold flex gap-2 shadow-lg shadow-green-200 transition-all hover:scale-105 active:scale-95 Vietnamese-Content"
+                                        >
+                                            Tiếp tục <ArrowRight size={20} />
+                                        </Button>
+                                    </motion.div>
+                                )}
                                 {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 10 }}

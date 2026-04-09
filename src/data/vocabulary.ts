@@ -27,7 +27,7 @@ export const vocabularyData: VocabularyItem[] = [
     {
         id: 1,
         word: "退学",
-        reading: "たいがく",
+        reading: "たい学",
         meaning: "Thôi học, bỏ học",
         han: "THOÁI HỌC",
         example: "病気で大学を退学した。",
@@ -66,7 +66,7 @@ export const vocabularyData: VocabularyItem[] = [
         reading: "しつぎょう",
         meaning: "Thất nghiệp",
         han: "THẤT NGHIỆP",
-        example: "会社が倒産して失業した。",
+        example: "会社가 倒産して失業した。",
         exampleMeaning: "Công ty phá sản nên tôi bị thất nghiệp.",
         level: "N3",
         category: "Danh từ / Động từ nhóm 3",
@@ -261,7 +261,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "化粧を落とす。",
         exampleMeaning: "Tẩy trang.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 21,
@@ -272,7 +273,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "計算が苦手だ。",
         exampleMeaning: "Tính toán kém.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 22,
@@ -283,7 +285,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "旅行の計画を立てる。",
         exampleMeaning: "Lập kế hoạch du lịch.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 23,
@@ -294,7 +297,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "実験に成功する。",
         exampleMeaning: "Thí nghiệm thành công.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 24,
@@ -305,7 +309,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "失敗は成功の母。",
         exampleMeaning: "Thất bại là mẹ thành công.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 25,
@@ -316,7 +321,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "心の準備。",
         exampleMeaning: "Chuẩn bị tâm lý.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 26,
@@ -327,7 +333,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "荷物を整理する。",
         exampleMeaning: "Sắp xếp hành lý.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 27,
@@ -338,7 +345,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "料理を注文する。",
         exampleMeaning: "Gọi món ăn.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 28,
@@ -349,18 +357,20 @@ export const vocabularyData: VocabularyItem[] = [
         example: "貯金箱。",
         exampleMeaning: "Heo đất tiết kiệm.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 29,
-        word: "徹夜",
+        word: "彻夜",
         reading: "てつや",
         meaning: "Thức trắng đêm",
         han: "TRIỆT DẠ",
-        example: "試験勉強で徹夜する。",
+        example: "試験勉強で彻夜する。",
         exampleMeaning: "Thức đêm học thi.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 30,
@@ -371,7 +381,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "隣の家に引っ越す。",
         exampleMeaning: "Chuyển sang nhà bên cạnh.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 31,
@@ -382,7 +393,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "身長が伸びる。",
         exampleMeaning: "Chiều cao tăng lên.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 32,
@@ -393,7 +405,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "体重を測る。",
         exampleMeaning: "Đo cân nặng.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 33,
@@ -404,7 +417,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "足にけがをする。",
         exampleMeaning: "Bị thương ở chân.",
         level: "N3",
-        category: "Danh từ / Động từ nhóm 3"
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: true
     },
     {
         id: 34,
@@ -415,7 +429,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "送別会。",
         exampleMeaning: "Tiệc chia tay.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 35,
@@ -426,7 +441,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "趣味は読書です。",
         exampleMeaning: "Sở thích là đọc sách.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 36,
@@ -437,7 +453,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "日本文化に興味がある。",
         exampleMeaning: "Hứng thú với văn hóa Nhật.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 37,
@@ -448,7 +465,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "楽しい思い出。",
         exampleMeaning: "Kỷ niệm vui.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 38,
@@ -459,7 +477,8 @@ export const vocabularyData: VocabularyItem[] = [
         example: "冗談を言う。",
         exampleMeaning: "Nói đùa.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
     },
     {
         id: 39,
@@ -470,6 +489,247 @@ export const vocabularyData: VocabularyItem[] = [
         example: "来日の目的。",
         exampleMeaning: "Mục đích đến Nhật.",
         level: "N3",
-        category: "Danh từ"
+        category: "Danh từ",
+        isLearned: true
+    },
+    {
+        id: 40,
+        word: "約束",
+        reading: "やくそく",
+        meaning: "Hẹn, hứa hẹn",
+        han: "ƯỚC THÚC",
+        example: "約束を守る。",
+        exampleMeaning: "Giữ lời hứa.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 41,
+        word: "おしゃべり",
+        reading: "おしゃべり",
+        meaning: "Nói chuyện, tán gẫu",
+        han: "(Tán gẫu)",
+        example: "友達とおしゃべりする。",
+        exampleMeaning: "Tán gẫu với bạn.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 42,
+        word: "遠慮",
+        reading: "えんりょ",
+        meaning: "Ngại ngần, khách khí",
+        han: "VIỄN LỰ",
+        example: "遠慮しないで食べてね。",
+        exampleMeaning: "Đừng ngại, ăn đi nhé.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 43,
+        word: "我慢",
+        reading: "がまん",
+        meaning: "Chịu đựng, nhẫn nại",
+        han: "NGÃ MẠN",
+        example: "痛みを我慢する。",
+        exampleMeaning: "Chịu đựng cơn đau.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 44,
+        word: "迷惑",
+        reading: "めいわく",
+        meaning: "Làm phiền, quấy rầy",
+        han: "MÊ HOẶC",
+        example: "迷惑をかける。",
+        exampleMeaning: "Làm phiền người khác.",
+        level: "N3",
+        category: "Danh từ / Tính từ đuôi na",
+        isLearned: false
+    },
+    {
+        id: 45,
+        word: "希望",
+        reading: "きぼう",
+        meaning: "Hy vọng, kỳ vọng",
+        han: "HY VỌNG",
+        example: "希望を持つ。",
+        exampleMeaning: "Có hy vọng.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 46,
+        word: "夢",
+        reading: "ゆめ",
+        meaning: "Giấc mơ, ước mơ",
+        han: "MỘNG",
+        example: "夢がかなう。",
+        exampleMeaning: "Ước mơ thành hiện thực.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 47,
+        word: "賛成",
+        reading: "さんせい",
+        meaning: "Tán thành, đồng ý",
+        han: "TÁN THÀNH",
+        example: "案に賛成する。",
+        exampleMeaning: "Tán thành phương án.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 48,
+        word: "反対",
+        reading: "はんたい",
+        meaning: "Phản đối, ngược lại",
+        han: "PHẢN ĐỐI",
+        example: "意見に反対する。",
+        exampleMeaning: "Phản đối ý kiến.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 49,
+        word: "想像",
+        reading: "そうぞう",
+        meaning: "Tưởng tượng",
+        han: "TƯỞNG TƯỢNG",
+        example: "想像力が豊かだ。",
+        exampleMeaning: "Trí tưởng tượng phong phú.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 50,
+        word: "努力",
+        reading: "どりょく",
+        meaning: "Nỗ lực, cố gắng",
+        han: "NỖ LỰC",
+        example: "努力を重ねる。",
+        exampleMeaning: "Nỗ lực không ngừng.",
+        level: "N3",
+        category: "Danh từ / Động từ nhóm 3",
+        isLearned: false
+    },
+    {
+        id: 51,
+        word: "太陽",
+        reading: "たいよう",
+        meaning: "Mặt trời",
+        han: "THÁI DƯƠNG",
+        example: "太陽が昇る。",
+        exampleMeaning: "Mặt trời mọc.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 52,
+        word: "地球",
+        reading: "ちきゅう",
+        meaning: "Trái đất",
+        han: "ĐỊA CẦU",
+        example: "地球温暖化。",
+        exampleMeaning: "Trái đất nóng lên.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 53,
+        word: "温度",
+        reading: "おんど",
+        meaning: "Nhiệt độ",
+        han: "ÔN ĐỘ",
+        example: "温度を測る。",
+        exampleMeaning: "Đo nhiệt độ.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 54,
+        word: "湿度",
+        reading: "しつど",
+        meaning: "Độ ẩm",
+        han: "THẤP ĐỘ",
+        example: "湿度が高い。",
+        exampleMeaning: "Đo độ ẩm.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 55,
+        word: "湿気",
+        reading: "しっけ",
+        meaning: "Hơi ẩm, ẩm thấp",
+        han: "THẤP KHÍ",
+        example: "湿気が多い。",
+        exampleMeaning: "Nhiều hơi ẩm.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 56,
+        word: "梅雨",
+        reading: "つゆ",
+        meaning: "Mùa mưa",
+        han: "MAI VŨ",
+        example: "梅雨に入る。",
+        exampleMeaning: "Vào mùa mưa.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 57,
+        word: "かび",
+        reading: "かび",
+        meaning: "Nấm mốc",
+        han: "(Nấm mốc)",
+        example: "かびが生える。",
+        exampleMeaning: "Bị mốc.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 58,
+        word: "暖房",
+        reading: "だんぼう",
+        meaning: "Hệ thống sưởi",
+        han: "NOÃN PHÒNG",
+        example: "暖房をつける。",
+        exampleMeaning: "Bật lò sưởi.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
+    },
+    {
+        id: 59,
+        word: "皮",
+        reading: "かわ",
+        meaning: "Vỏ, da",
+        han: "BÌ",
+        example: "りんごの皮をむく。",
+        exampleMeaning: "Gọt vỏ táo.",
+        level: "N3",
+        category: "Danh từ",
+        isLearned: false
     }
 ];

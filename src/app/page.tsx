@@ -152,20 +152,30 @@ export default function Home() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
-    // Calculate totals
-    const totalVocabInKanji = useMemo(() => {
-        return kanjiData.reduce((acc, kanji) => acc + kanji.vocab.length, 0);
-    }, []);
+    // Calculate totals and progress for Dashboard/ProgressChart
+    const kanjiProgress = useMemo(() => {
+        const dataLearnedIds = kanjiData.filter((k) => k.isLearned).map((k) => k.id);
+        const allLearned = new Set([...dataLearnedIds, ...Array.from(learned)]);
+        return {
+            learned: allLearned.size,
+            total: kanjiData.length,
+        };
+    }, [learned]);
 
-    const filteredKanjiData = useMemo(() => kanjiData.filter((item) => !item.isLearned), []);
-    const filteredVocabularyData = useMemo(() => vocabularyData.filter((item) => !item.isLearned), []);
+    const vocabProgress = useMemo(() => {
+        const dataLearnedIds = vocabularyData.filter((v) => v.isLearned).map((v) => v.id);
+        const allLearned = new Set([...dataLearnedIds, ...Array.from(learnedVocab)]);
+        return {
+            learned: allLearned.size,
+            total: vocabularyData.length,
+        };
+    }, [learnedVocab]);
 
-    const currentDataCount = activeTab === "kanji" ? filteredKanjiData.length : filteredVocabularyData.length;
-    const currentLearnedCount = activeTab === "kanji" ? learned.size : learnedVocab.size;
+    const currentProgress = activeTab === "kanji" ? kanjiProgress : vocabProgress;
 
     return (
         <div className="min-h-screen bg-[#fafafa] font-sans text-stone-900 selection:bg-primary/10 selection:text-primary">
-            <Header learnedCount={currentLearnedCount} totalCount={currentDataCount} level="JLPT N3" />
+            <Header learnedCount={currentProgress.learned} totalCount={currentProgress.total} level="JLPT N3" />
 
             <main className="container mx-auto px-4 max-w-7xl mt-20">
                 {/* Dashboard Section */}
@@ -252,7 +262,7 @@ export default function Home() {
                                     Tiến độ {activeTab === "kanji" ? "Kanji" : "Từ Vựng"}
                                 </CardTitle>
                             </CardHeader>
-                            <ProgressChart learned={currentLearnedCount} total={currentDataCount} />
+                            <ProgressChart learned={currentProgress.learned} total={currentProgress.total} />
                         </Card>
                     </motion.div>
                 </div>
@@ -280,7 +290,7 @@ export default function Home() {
                     <TabsContent value="kanji" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="mb-20">
                             <KanjiGrid
-                                data={filteredKanjiData}
+                                data={kanjiData.filter((item) => !item.isLearned)}
                                 currentIndex={currentIndex}
                                 learned={learned}
                                 onSelect={selectKanji}
@@ -291,7 +301,7 @@ export default function Home() {
                     <TabsContent value="vocab" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="mb-20">
                             <VocabGrid
-                                data={filteredVocabularyData}
+                                data={vocabularyData.filter((item) => !item.isLearned)}
                                 currentIndex={vocabIndex}
                                 learned={learnedVocab}
                                 onSelect={selectVocab}
