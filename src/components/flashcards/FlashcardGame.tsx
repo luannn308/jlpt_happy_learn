@@ -20,7 +20,8 @@ export default function FlashcardGame() {
     // Reset game when mode changes
     useEffect(() => {
         const data = mode === "vocab" ? vocabularyData : kanjiData;
-        setCards(data);
+        const filtered = data.filter(item => !item.isLearned);
+        setCards(filtered);
         setCurrentIndex(0);
         setIsFlipped(false);
     }, [mode]);
@@ -43,7 +44,8 @@ export default function FlashcardGame() {
 
     const handleShuffle = () => {
         const data = mode === "vocab" ? vocabularyData : kanjiData;
-        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        const filtered = data.filter(item => !item.isLearned);
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
         setCards(shuffled);
         setCurrentIndex(0);
         setIsFlipped(false);
@@ -51,7 +53,8 @@ export default function FlashcardGame() {
 
     const handleReset = () => {
         const data = mode === "vocab" ? vocabularyData : kanjiData;
-        setCards(data);
+        const filtered = data.filter(item => !item.isLearned);
+        setCards(filtered);
         setCurrentIndex(0);
         setIsFlipped(false);
     };
@@ -63,7 +66,7 @@ export default function FlashcardGame() {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.code === "Space") {
+            if (e.code === "Space" || e.code === "ArrowUp" || e.code === "ArrowDown") {
                 e.preventDefault();
                 toggleFlip();
             } else if (e.code === "ArrowRight") {
@@ -168,9 +171,9 @@ export default function FlashcardGame() {
             </div>
 
             <div className="flex flex-col items-center gap-4 text-stone-400">
-                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                    <Sparkles size={14} className="text-primary" /> Mẹo: Click hoặc nhấn [Dấu cách] để lật, [Mũi tên] để
-                    chuyển thẻ
+                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-center px-4">
+                    <Sparkles size={14} className="text-primary flex-shrink-0" />
+                    <span>Mẹo: Nhấn [Khoảng cách] hoặc [↑][↓] để lật, [←][→] để chuyển thẻ</span>
                 </p>
             </div>
         </div>

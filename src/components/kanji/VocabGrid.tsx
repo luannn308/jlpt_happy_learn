@@ -17,8 +17,8 @@ export default function VocabGrid({ data, currentIndex, learned, onSelect }: Voc
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
             {data.map((item, idx) => {
-                const isActive = currentIndex === idx;
-                const isLearned = learned.has(idx);
+                const isActive = currentIndex === item.id;
+                const isLearned = learned.has(item.id);
 
                 return (
                     <motion.div
@@ -28,7 +28,7 @@ export default function VocabGrid({ data, currentIndex, learned, onSelect }: Voc
                         transition={{ delay: idx * 0.05 }}
                         whileHover={{ y: -4, scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => onSelect(idx)}
+                        onClick={() => onSelect(item.id)}
                         className={cn(
                             "group relative flex flex-col p-4 rounded-2xl cursor-pointer transition-all duration-300",
                             "border-2",
@@ -46,7 +46,7 @@ export default function VocabGrid({ data, currentIndex, learned, onSelect }: Voc
                                     isLearned ? "text-emerald-500" : "text-stone-300",
                                 )}
                             >
-                                #{String(idx + 1).padStart(2, "0")}
+                                #{String(item.id + 1).padStart(2, "0")}
                             </span>
                             {isLearned && <CheckCircle2 className="h-4 w-4 text-emerald-500 fill-emerald-50" />}
                         </div>

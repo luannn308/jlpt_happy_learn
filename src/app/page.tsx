@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Sparkles, BookOpenCheck, Settings, LayoutGrid, Info, Keyboard, Languages, BookA } from "lucide-react";
+import {
+    Target,
+    Sparkles,
+    BookOpenCheck,
+    Settings,
+    LayoutGrid,
+    Info,
+    Keyboard,
+    Languages,
+    BookA,
+    PenTool,
+} from "lucide-react";
 import Link from "next/link";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
@@ -20,15 +31,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState<string>("kanji");
-    
+
     // Kanji States
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
     const [learned, setLearned] = useState<Set<number>>(new Set());
-    
+
     // Vocabulary States
     const [vocabIndex, setVocabIndex] = useState<number | null>(null);
     const [learnedVocab, setLearnedVocab] = useState<Set<number>>(new Set());
-    
+
     const [masks, setMasks] = useState({ reading: false, meaning: false });
 
     // Load all learned data from localStorage
@@ -41,7 +52,7 @@ export default function Home() {
                 console.error("Failed to parse learned kanji", e);
             }
         }
-        
+
         const savedVocab = localStorage.getItem("jlpt_learned_vocab");
         if (savedVocab) {
             try {
@@ -146,7 +157,10 @@ export default function Home() {
         return kanjiData.reduce((acc, kanji) => acc + kanji.vocab.length, 0);
     }, []);
 
-    const currentDataCount = activeTab === "kanji" ? kanjiData.length : vocabularyData.length;
+    const filteredKanjiData = useMemo(() => kanjiData.filter((item) => !item.isLearned), []);
+    const filteredVocabularyData = useMemo(() => vocabularyData.filter((item) => !item.isLearned), []);
+
+    const currentDataCount = activeTab === "kanji" ? filteredKanjiData.length : filteredVocabularyData.length;
     const currentLearnedCount = activeTab === "kanji" ? learned.size : learnedVocab.size;
 
     return (
@@ -173,7 +187,8 @@ export default function Home() {
                                 </div>
 
                                 <p className="text-stone-500 text-lg leading-relaxed mb-10 max-w-2xl">
-                                    Hôm nay bạn cần chinh phục hệ thống từ vựng và Kanji N3. Mỗi mục tiêu đều được tối ưu hóa để giúp bạn ghi nhớ nhanh và lâu hơn qua ví dụ thực tế.
+                                    Hôm nay bạn cần chinh phục hệ thống từ vựng và Kanji N3. Mỗi mục tiêu đều được tối
+                                    ưu hóa để giúp bạn ghi nhớ nhanh và lâu hơn qua ví dụ thực tế.
                                 </p>
 
                                 <div className="flex flex-wrap gap-8">
@@ -182,7 +197,9 @@ export default function Home() {
                                             Tổng chữ Kanji
                                         </span>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-4xl font-black text-stone-900">{kanjiData.length}</span>
+                                            <span className="text-4xl font-black text-stone-900">
+                                                {kanjiData.length}
+                                            </span>
                                             <span className="text-sm font-bold text-stone-400 uppercase">Chữ</span>
                                         </div>
                                     </div>
@@ -192,22 +209,33 @@ export default function Home() {
                                             Tổng từ vựng
                                         </span>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-4xl font-black text-stone-900">{vocabularyData.length}</span>
+                                            <span className="text-4xl font-black text-stone-900">
+                                                {vocabularyData.length}
+                                            </span>
                                             <span className="text-sm font-bold text-stone-400 uppercase">Từ</span>
                                         </div>
                                     </div>
                                     <div className="hidden lg:block w-[1px] bg-stone-100 mx-4" />
-                                    <div className="self-center mt-4 sm:mt-0">
-                                        <Link href="/flashcards">
-                                            <Button 
-                                                variant="default"
-                                                size="lg"
-                                                className="bg-primary text-white hover:bg-primary/90 font-bold px-8 py-7 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-3 transition-all hover:scale-105 active:scale-95"
-                                            >
-                                                <Sparkles className="fill-white/20" /> Bắt đầu ôn tập
-                                            </Button>
+                                    <nav className="flex flex-wrap items-center gap-3 mt-6 sm:mt-0">
+                                        <Link href="/flashcards" className="group flex-1 min-w-[140px] sm:flex-none">
+                                            <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 hover:bg-primary/90">
+                                                <Sparkles className="h-5 w-5 fill-white/20 transition-transform group-hover:rotate-12" />
+                                                <span className="text-xs font-bold uppercase tracking-wider">Ôn tập</span>
+                                            </div>
                                         </Link>
-                                    </div>
+                                        <Link href="/quiz" className="group flex-1 min-w-[140px] sm:flex-none">
+                                            <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border-2 border-primary/10 text-primary transition-all hover:scale-105 active:scale-95 hover:bg-primary/5 hover:border-primary/20">
+                                                <BookOpenCheck className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
+                                                <span className="text-xs font-bold uppercase tracking-wider">Trắc nghiệm</span>
+                                            </div>
+                                        </Link>
+                                        <Link href="/writing" className="group flex-1 min-w-[140px] sm:flex-none">
+                                            <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border-2 border-primary/10 text-primary transition-all hover:scale-105 active:scale-95 hover:bg-primary/5 hover:border-primary/20">
+                                                <PenTool className="h-5 w-5 transition-transform group-hover:-rotate-12" />
+                                                <span className="text-xs font-bold uppercase tracking-wider">Tự luận</span>
+                                            </div>
+                                        </Link>
+                                    </nav>
                                 </div>
                             </CardContent>
                         </Card>
@@ -232,11 +260,17 @@ export default function Home() {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-16">
                     <div className="flex justify-center mb-10">
                         <TabsList className="bg-stone-100 p-1 rounded-2xl h-14 md:h-16 w-full max-w-md shadow-inner">
-                            <TabsTrigger value="kanji" className="rounded-[0.9rem] flex-1 font-black uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all h-full text-stone-400">
+                            <TabsTrigger
+                                value="kanji"
+                                className="rounded-[0.9rem] flex-1 font-black uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all h-full text-stone-400"
+                            >
                                 <Languages className="mr-2 h-5 w-5" />
                                 Kanji
                             </TabsTrigger>
-                            <TabsTrigger value="vocab" className="rounded-[0.9rem] flex-1 font-black uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all h-full text-stone-400">
+                            <TabsTrigger
+                                value="vocab"
+                                className="rounded-[0.9rem] flex-1 font-black uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all h-full text-stone-400"
+                            >
                                 <BookA className="mr-2 h-5 w-5" />
                                 Từ Vựng
                             </TabsTrigger>
@@ -245,13 +279,23 @@ export default function Home() {
 
                     <TabsContent value="kanji" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="mb-20">
-                            <KanjiGrid data={kanjiData} currentIndex={currentIndex} learned={learned} onSelect={selectKanji} />
+                            <KanjiGrid
+                                data={filteredKanjiData}
+                                currentIndex={currentIndex}
+                                learned={learned}
+                                onSelect={selectKanji}
+                            />
                         </div>
                     </TabsContent>
 
                     <TabsContent value="vocab" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="mb-20">
-                            <VocabGrid data={vocabularyData} currentIndex={vocabIndex} learned={learnedVocab} onSelect={selectVocab} />
+                            <VocabGrid
+                                data={filteredVocabularyData}
+                                currentIndex={vocabIndex}
+                                learned={learnedVocab}
+                                onSelect={selectVocab}
+                            />
                         </div>
                     </TabsContent>
                 </Tabs>
@@ -259,7 +303,8 @@ export default function Home() {
                 {/* Detailed Study Area */}
                 <section id="studyArea" className="relative scroll-mt-32 min-h-[600px] mb-32">
                     <AnimatePresence mode="wait">
-                        {((activeTab === "kanji" && currentIndex === null) || (activeTab === "vocab" && vocabIndex === null)) ? (
+                        {(activeTab === "kanji" && currentIndex === null) ||
+                        (activeTab === "vocab" && vocabIndex === null) ? (
                             <motion.div
                                 key="empty"
                                 initial={{ opacity: 0, y: 30 }}
@@ -351,5 +396,4 @@ export default function Home() {
         </div>
     );
 }
-
 
