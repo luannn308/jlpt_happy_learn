@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { vocabularyData, VocabularyItem } from "@/data/vocabulary";
+import { useData } from "@/context/DataContext";
+import { VocabularyItem } from "@/data/vocabulary";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +17,9 @@ import { Input } from "@/components/ui/input";
 type VocabMode = "word-to-reading" | "meaning-to-word" | "word-to-meaning";
 
 export default function VocabWriting() {
+    const { vocabularyData, isLoading } = useData();
     const [mode, setMode] = useState<VocabMode>("word-to-reading");
+
     const [queue, setQueue] = useState<VocabularyItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [userInput, setUserInput] = useState("");
@@ -185,7 +189,17 @@ export default function VocabWriting() {
         );
     }
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] w-full max-w-2xl mx-auto p-4 space-y-8">
+                <div className="w-full h-12 bg-stone-100 rounded-2xl animate-pulse" />
+                <div className="w-full h-[300px] bg-white rounded-[3rem] animate-pulse shadow-xl" />
+            </div>
+        );
+    }
+
     if (!currentVocab) return null;
+
 
     const progress = (currentIndex / queue.length) * 100;
 

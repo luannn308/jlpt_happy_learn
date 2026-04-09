@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { kanjiData, KanjiData } from "@/data/kanji";
+import { useData } from "@/context/DataContext";
+import { KanjiData } from "@/data/kanji";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -32,11 +34,13 @@ interface Question {
     correctAnswer: string;
     options: string[];
     reading?: string; // Thêm cách đọc
-    han?: string;     // Thêm âm Hán
+    han?: string; // Thêm âm Hán
 }
 
 export default function KanjiQuiz() {
+    const { kanjiData, isLoading } = useData();
     const [quizMode, setQuizMode] = useState<QuizMode>("all");
+
     const [originalQuestions, setOriginalQuestions] = useState<Question[]>([]);
     const [queue, setQueue] = useState<Question[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -183,12 +187,12 @@ export default function KanjiQuiz() {
         let correctAnswer = "";
         let options: string[] = [];
 
-        const radicals = getRadicals(kanji.components);
+        const radicals = getRadicals(kanji.component);
 
         // Find similar distractors based on radicals
         const findDistractors = (field: keyof KanjiData, count: number) => {
             let similar = kanjiData.filter(
-                (k) => k.id !== kanji.id && getRadicals(k.components).some((r) => radicals.includes(r)),
+                (k) => k.id !== kanji.id && getRadicals(k.component).some((r) => radicals.includes(r)),
             );
 
             if (similar.length < count) {
@@ -444,6 +448,15 @@ export default function KanjiQuiz() {
         );
     }
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[600px] w-full max-w-2xl mx-auto p-4 space-y-8">
+                <div className="w-full h-8 bg-stone-100 rounded-full animate-pulse" />
+                <div className="w-full h-[400px] bg-white rounded-[3rem] animate-pulse shadow-xl" />
+            </div>
+        );
+    }
+
     if (!currentQuestion) return null;
 
     return (
@@ -552,7 +565,8 @@ export default function KanjiQuiz() {
                                 >
                                     {isAnswered &&
                                     selectedAnswer === currentQuestion.correctAnswer &&
-                                    (currentQuestion.type === "vocab-meaning" || currentQuestion.type === "han-viet") ? (
+                                    (currentQuestion.type === "vocab-meaning" ||
+                                        currentQuestion.type === "han-viet") ? (
                                         <ruby className="ruby-position-over">
                                             {currentQuestion.questionText}
                                             <rt className="text-primary text-xl md:text-2xl font-bold mb-2 lowercase tracking-normal">

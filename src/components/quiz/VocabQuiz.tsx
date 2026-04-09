@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { vocabularyData, VocabularyItem } from "@/data/vocabulary";
+import { useData } from "@/context/DataContext";
+import { VocabularyItem } from "@/data/vocabulary";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -26,7 +28,9 @@ interface VocabQuestion {
 }
 
 export default function VocabQuiz() {
+    const { vocabularyData, isLoading } = useData();
     const [quizMode, setQuizMode] = useState<VocabQuizMode>("all");
+
     const [originalQuestions, setOriginalQuestions] = useState<VocabQuestion[]>([]);
     const [queue, setQueue] = useState<VocabQuestion[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<VocabQuestion | null>(null);
@@ -37,6 +41,8 @@ export default function VocabQuiz() {
     const [completedCount, setCompletedCount] = useState(0);
     const [hasFailedCurrent, setHasFailedCurrent] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+
+    const poolLength = useMemo(() => vocabularyData.filter((v) => !v.isLearned).length, [vocabularyData]);
 
     // Audio Context Utility (Reused from KanjiQuiz)
     const playSFX = useCallback(
@@ -307,7 +313,17 @@ export default function VocabQuiz() {
         );
     }
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[600px] w-full max-w-2xl mx-auto p-4 space-y-8">
+                <div className="w-full h-8 bg-stone-100 rounded-full animate-pulse" />
+                <div className="w-full h-[400px] bg-white rounded-[3rem] animate-pulse shadow-xl" />
+            </div>
+        );
+    }
+
     if (!currentQuestion) return null;
+
 
     return (
         <div className="w-full max-w-2xl mx-auto space-y-8 p-4 py-10">
@@ -507,5 +523,6 @@ export default function VocabQuiz() {
 }
 
 // Add this to handle pool length check in result screen
-const poolLength = vocabularyData.filter((v) => !v.isLearned).length;
+// Logic moved inside component or uses dynamic data
+
 

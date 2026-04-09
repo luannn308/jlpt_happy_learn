@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { kanjiData, KanjiData } from "@/data/kanji";
+import { useData } from "@/context/DataContext";
+import { KanjiData } from "@/data/kanji";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +17,9 @@ import { Input } from "@/components/ui/input";
 type WritingMode = "kanji-to-han" | "kanji-to-on" | "kanji-to-kun";
 
 export default function KanjiWriting() {
+    const { kanjiData, isLoading } = useData();
     const [mode, setMode] = useState<WritingMode>("kanji-to-han");
+
     const [queue, setQueue] = useState<KanjiData[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [userInput, setUserInput] = useState("");
@@ -205,7 +209,17 @@ export default function KanjiWriting() {
         );
     }
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] w-full max-w-3xl mx-auto p-4 space-y-8">
+                <div className="w-full h-12 bg-stone-100 rounded-2xl animate-pulse" />
+                <div className="w-full h-[300px] bg-white rounded-[3rem] animate-pulse shadow-xl" />
+            </div>
+        );
+    }
+
     if (!currentKanji) return null;
+
 
     const progress = (currentIndex / queue.length) * 100;
 

@@ -32,6 +32,8 @@ export default function KanjiDetail({
     onNext,
     onPrev,
 }: KanjiDetailProps) {
+    if (!data) return null;
+
     return (
         <AnimatePresence mode="wait">
             <motion.div
@@ -55,6 +57,11 @@ export default function KanjiDetail({
                             <h2 className="mt-4 text-3xl font-black tracking-tighter text-primary uppercase">
                                 {data.han}
                             </h2>
+                            {data.meaning && (
+                                <p className="mt-1 text-sm font-medium text-stone-500 italic">
+                                    ({data.meaning})
+                                </p>
+                            )}
 
                             <div className="mt-8 flex w-full flex-col gap-3">
                                 <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition-all hover:border-primary/20">
@@ -117,7 +124,7 @@ export default function KanjiDetail({
                                             </span>
                                         </div>
                                         <div className="rounded-2xl bg-stone-50 p-5 text-stone-700 leading-relaxed border border-stone-100">
-                                            <div dangerouslySetInnerHTML={{ __html: data.components }} />
+                                            <div dangerouslySetInnerHTML={{ __html: data.component }} />
                                         </div>
                                     </div>
 

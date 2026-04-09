@@ -4,17 +4,24 @@ import React from "react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import FlashcardGame from "@/components/flashcards/FlashcardGame";
-import { vocabularyData } from "@/data/vocabulary";
-import { kanjiData } from "@/data/kanji";
+import { useData } from "@/context/DataContext";
+
 import { motion } from "framer-motion";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function FlashcardsPage() {
+    const { kanjiData, vocabularyData, isLoading } = useData();
+
     return (
         <div className="min-h-screen bg-[#fafafa] font-sans text-stone-900 selection:bg-primary/10 selection:text-primary">
-            <Header learnedCount={0} totalCount={vocabularyData.length + kanjiData.length} level="JLPT N3 - Ôn Tập" />
+            <Header 
+              learnedCount={0} 
+              totalCount={isLoading ? 0 : vocabularyData.length + kanjiData.length} 
+              level="JLPT N3 - Ôn Tập" 
+            />
+
 
             <main className="container mx-auto px-4 max-w-7xl mt-20 relative">
                 {/* Back Button */}

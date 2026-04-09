@@ -22,15 +22,17 @@ import KanjiGrid from "@/components/kanji/KanjiGrid";
 import KanjiDetail from "@/components/kanji/KanjiDetail";
 import VocabGrid from "@/components/kanji/VocabGrid";
 import VocabDetail from "@/components/kanji/VocabDetail";
-import { kanjiData } from "@/data/kanji";
-import { vocabularyData } from "@/data/vocabulary";
+import { useData } from "@/context/DataContext";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
+    const { kanjiData, vocabularyData, isLoading, updateLearnedStatus } = useData();
     const [activeTab, setActiveTab] = useState<string>("kanji");
+
 
     // Kanji States
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -73,15 +75,11 @@ export default function Home() {
     }, [learnedVocab]);
 
     const selectKanji = useCallback((id: number) => {
-        if (id < 0) id = 0;
-        if (id >= kanjiData.length) id = kanjiData.length - 1;
         setCurrentIndex(id);
         scrolltoStudyArea();
     }, []);
 
     const selectVocab = useCallback((id: number) => {
-        if (id < 0) id = 0;
-        if (id >= vocabularyData.length) id = vocabularyData.length - 1;
         setVocabIndex(id);
         scrolltoStudyArea();
     }, []);
@@ -100,51 +98,68 @@ export default function Home() {
         }, 100);
     };
 
-    const toggleLearned = useCallback(() => {
+    const toggleLearned = useCallback(async () => {
         if (activeTab === "kanji") {
             if (currentIndex === null) return;
+            const isCurrentlyLearned = learned.has(currentIndex);
+            const newStatus = !isCurrentlyLearned;
+            
+            // 1. Cập nhật local state
             setLearned((prev) => {
                 const next = new Set(prev);
                 if (next.has(currentIndex)) next.delete(currentIndex);
                 else next.add(currentIndex);
                 return next;
             });
+
+            // 2. Cập nhật lên Google Sheets
+            await updateLearnedStatus("kanji", currentIndex, newStatus);
+            
         } else {
             if (vocabIndex === null) return;
+            const isCurrentlyLearned = learnedVocab.has(vocabIndex);
+            const newStatus = !isCurrentlyLearned;
+
+            // 1. Cập nhật local state
             setLearnedVocab((prev) => {
                 const next = new Set(prev);
                 if (next.has(vocabIndex)) next.delete(vocabIndex);
                 else next.add(vocabIndex);
                 return next;
             });
+
+            // 2. Cập nhật lên Google Sheets
+            await updateLearnedStatus("vocab", vocabIndex, newStatus);
         }
-    }, [currentIndex, vocabIndex, activeTab]);
+    }, [currentIndex, vocabIndex, activeTab, learned, learnedVocab, updateLearnedStatus]);
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
             if (activeTab === "kanji") {
                 if (currentIndex === null) return;
-                if (e.key === "ArrowLeft") {
+                const currentIdx = kanjiData.findIndex((k) => k.id === currentIndex);
+                if (e.key === "ArrowLeft" && currentIdx > 0) {
                     e.preventDefault();
-                    selectKanji(currentIndex - 1);
+                    selectKanji(kanjiData[currentIdx - 1].id);
                 }
-                if (e.key === "ArrowRight") {
+                if (e.key === "ArrowRight" && currentIdx < kanjiData.length - 1) {
                     e.preventDefault();
-                    selectKanji(currentIndex + 1);
+                    selectKanji(kanjiData[currentIdx + 1].id);
                 }
             } else {
                 if (vocabIndex === null) return;
-                if (e.key === "ArrowLeft") {
+                const currentIdx = vocabularyData.findIndex((v) => v.id === vocabIndex);
+                if (e.key === "ArrowLeft" && currentIdx > 0) {
                     e.preventDefault();
-                    selectVocab(vocabIndex - 1);
+                    selectVocab(vocabularyData[currentIdx - 1].id);
                 }
-                if (e.key === "ArrowRight") {
+                if (e.key === "ArrowRight" && currentIdx < vocabularyData.length - 1) {
                     e.preventDefault();
-                    selectVocab(vocabIndex + 1);
+                    selectVocab(vocabularyData[currentIdx + 1].id);
                 }
             }
         },
-        [currentIndex, vocabIndex, activeTab, selectKanji, selectVocab],
+        [currentIndex, vocabIndex, activeTab, selectKanji, selectVocab, kanjiData, vocabularyData],
     );
 
     useEffect(() => {
@@ -160,7 +175,7 @@ export default function Home() {
             learned: allLearned.size,
             total: kanjiData.length,
         };
-    }, [learned]);
+    }, [learned, kanjiData]);
 
     const vocabProgress = useMemo(() => {
         const dataLearnedIds = vocabularyData.filter((v) => v.isLearned).map((v) => v.id);
@@ -169,13 +184,36 @@ export default function Home() {
             learned: allLearned.size,
             total: vocabularyData.length,
         };
-    }, [learnedVocab]);
+    }, [learnedVocab, vocabularyData]);
 
     const currentProgress = activeTab === "kanji" ? kanjiProgress : vocabProgress;
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#fafafa] font-sans text-stone-900">
+                <Header learnedCount={0} totalCount={0} level="Đang tải..." />
+                <main className="container mx-auto px-4 max-w-7xl mt-20">
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-10">
+                        <div className="lg:col-span-2 h-[300px] bg-white rounded-3xl animate-pulse" />
+                        <div className="h-[300px] bg-white rounded-3xl animate-pulse" />
+                    </div>
+                    <div className="flex justify-center mb-10">
+                        <div className="h-16 w-full max-w-md bg-stone-100 rounded-2xl animate-pulse" />
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {[...Array(12)].map((_, i) => (
+                            <div key={i} className="h-24 bg-white rounded-2xl animate-pulse" />
+                        ))}
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#fafafa] font-sans text-stone-900 selection:bg-primary/10 selection:text-primary">
             <Header learnedCount={currentProgress.learned} totalCount={currentProgress.total} level="JLPT N3" />
+
 
             <main className="container mx-auto px-4 max-w-7xl mt-20">
                 {/* Dashboard Section */}
@@ -374,27 +412,41 @@ export default function Home() {
                                 </div>
 
                                 {activeTab === "kanji" && currentIndex !== null ? (
-                                    <KanjiDetail
-                                        data={kanjiData[currentIndex]}
-                                        currentIndex={currentIndex}
-                                        total={kanjiData.length}
-                                        isLearned={learned.has(currentIndex)}
-                                        masks={masks}
-                                        onToggleLearned={toggleLearned}
-                                        onNext={() => selectKanji(currentIndex + 1)}
-                                        onPrev={() => selectKanji(currentIndex - 1)}
-                                    />
+                                    (() => {
+                                        const kanjiItem = kanjiData.find(k => k.id === currentIndex);
+                                        const kanjiIdx = kanjiData.findIndex(k => k.id === currentIndex);
+                                        if (!kanjiItem) return null;
+                                        return (
+                                            <KanjiDetail
+                                                data={kanjiItem}
+                                                currentIndex={kanjiIdx}
+                                                total={kanjiData.length}
+                                                isLearned={learned.has(currentIndex)}
+                                                masks={masks}
+                                                onToggleLearned={toggleLearned}
+                                                onNext={() => kanjiIdx < kanjiData.length - 1 && selectKanji(kanjiData[kanjiIdx + 1].id)}
+                                                onPrev={() => kanjiIdx > 0 && selectKanji(kanjiData[kanjiIdx - 1].id)}
+                                            />
+                                        );
+                                    })()
                                 ) : activeTab === "vocab" && vocabIndex !== null ? (
-                                    <VocabDetail
-                                        data={vocabularyData[vocabIndex]}
-                                        currentIndex={vocabIndex}
-                                        total={vocabularyData.length}
-                                        isLearned={learnedVocab.has(vocabIndex)}
-                                        masks={masks}
-                                        onToggleLearned={toggleLearned}
-                                        onNext={() => selectVocab(vocabIndex + 1)}
-                                        onPrev={() => selectVocab(vocabIndex - 1)}
-                                    />
+                                    (() => {
+                                        const vocabItem = vocabularyData.find(v => v.id === vocabIndex);
+                                        const vocabIdx = vocabularyData.findIndex(v => v.id === vocabIndex);
+                                        if (!vocabItem) return null;
+                                        return (
+                                            <VocabDetail
+                                                data={vocabItem}
+                                                currentIndex={vocabIdx}
+                                                total={vocabularyData.length}
+                                                isLearned={learnedVocab.has(vocabIndex)}
+                                                masks={masks}
+                                                onToggleLearned={toggleLearned}
+                                                onNext={() => vocabIdx < vocabularyData.length - 1 && selectVocab(vocabularyData[vocabIdx + 1].id)}
+                                                onPrev={() => vocabIdx > 0 && selectVocab(vocabularyData[vocabIdx - 1].id)}
+                                            />
+                                        );
+                                    })()
                                 ) : null}
                             </motion.div>
                         )}

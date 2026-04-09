@@ -31,6 +31,8 @@ export default function VocabDetail({
     onNext,
     onPrev,
 }: VocabDetailProps) {
+    if (!data) return null;
+
     return (
         <AnimatePresence mode="wait">
             <motion.div
@@ -82,8 +84,6 @@ export default function VocabDetail({
                                 </span>
                                 <p className="font-kanji text-3xl font-black text-primary">{data.reading}</p>
                             </div>
-
-
 
                             <Button
                                 variant={isLearned ? "outline" : "default"}

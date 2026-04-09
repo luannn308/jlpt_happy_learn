@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Ứng dụng giúp bạn học tiếng Nhật dễ dàng với phương pháp thông minh và hiện đại.",
 };
 
+import { DataProvider } from "@/context/DataContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,8 +29,11 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${beVietnamPro.variable} ${notoSansJP.variable}`}>
       <body className="antialiased">
-        {children}
+        <DataProvider>
+          {children}
+        </DataProvider>
       </body>
     </html>
   );
 }
+
