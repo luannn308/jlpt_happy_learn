@@ -2,37 +2,23 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    Target,
-    Sparkles,
-    BookOpenCheck,
-    Settings,
-    LayoutGrid,
-    Info,
-    Keyboard,
-    Languages,
-    BookA,
-    PenTool,
-} from "lucide-react";
-import Link from "next/link";
+import { Sparkles, Languages, BookA } from "lucide-react";
+import { useData } from "@/context/DataContext";
+import StudyDashboard from "@/components/dashboard/StudyDashboard";
+import StudyAreaPlaceholder from "@/components/common/StudyAreaPlaceholder";
+
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import ProgressChart from "@/components/kanji/ProgressChart";
 import KanjiGrid from "@/components/kanji/KanjiGrid";
 import KanjiDetail from "@/components/kanji/KanjiDetail";
 import VocabGrid from "@/components/kanji/VocabGrid";
 import VocabDetail from "@/components/kanji/VocabDetail";
-import { useData } from "@/context/DataContext";
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
     const { kanjiData, vocabularyData, isLoading, updateLearnedStatus } = useData();
     const [activeTab, setActiveTab] = useState<string>("kanji");
-
 
     // Kanji States
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -103,7 +89,7 @@ export default function Home() {
             if (currentIndex === null) return;
             const isCurrentlyLearned = learned.has(currentIndex);
             const newStatus = !isCurrentlyLearned;
-            
+
             // 1. Cập nhật local state
             setLearned((prev) => {
                 const next = new Set(prev);
@@ -114,7 +100,6 @@ export default function Home() {
 
             // 2. Cập nhật lên Google Sheets
             await updateLearnedStatus("kanji", currentIndex, newStatus);
-            
         } else {
             if (vocabIndex === null) return;
             const isCurrentlyLearned = learnedVocab.has(vocabIndex);
@@ -214,96 +199,14 @@ export default function Home() {
         <div className="min-h-screen bg-[#fafafa] font-sans text-stone-900 selection:bg-primary/10 selection:text-primary">
             <Header learnedCount={currentProgress.learned} totalCount={currentProgress.total} level="JLPT N3" />
 
-
             <main className="container mx-auto px-4 max-w-7xl mt-20">
                 {/* Dashboard Section */}
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-10">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="lg:col-span-2"
-                    >
-                        <Card className="h-full border-none shadow-xl shadow-stone-200/40 bg-white rounded-3xl overflow-hidden">
-                            <CardContent className="p-8 md:p-12 flex flex-col justify-center h-full">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                        <Target className="text-primary h-6 w-6" />
-                                    </div>
-                                    <h2 className="text-2xl font-black tracking-tight md:text-3xl">
-                                        Mục tiêu học tập N3
-                                    </h2>
-                                </div>
-
-                                <p className="text-stone-500 text-lg leading-relaxed mb-10 max-w-2xl">
-                                    Hôm nay bạn cần chinh phục hệ thống từ vựng và Kanji N3. Mỗi mục tiêu đều được tối
-                                    ưu hóa để giúp bạn ghi nhớ nhanh và lâu hơn qua ví dụ thực tế.
-                                </p>
-
-                                <div className="flex flex-wrap gap-8">
-                                    <div className="space-y-1">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
-                                            Tổng chữ Kanji
-                                        </span>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-4xl font-black text-stone-900">
-                                                {kanjiData.length}
-                                            </span>
-                                            <span className="text-sm font-bold text-stone-400 uppercase">Chữ</span>
-                                        </div>
-                                    </div>
-                                    <div className="hidden sm:block w-[1px] bg-stone-100" />
-                                    <div className="space-y-1">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
-                                            Tổng từ vựng
-                                        </span>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-4xl font-black text-stone-900">
-                                                {vocabularyData.length}
-                                            </span>
-                                            <span className="text-sm font-bold text-stone-400 uppercase">Từ</span>
-                                        </div>
-                                    </div>
-                                    <div className="hidden lg:block w-[1px] bg-stone-100 mx-4" />
-                                    <nav className="flex flex-wrap items-center gap-3 mt-6 sm:mt-0">
-                                        <Link href="/flashcards" className="group flex-1 min-w-[140px] sm:flex-none">
-                                            <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 hover:bg-primary/90">
-                                                <Sparkles className="h-5 w-5 fill-white/20 transition-transform group-hover:rotate-12" />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Ôn tập</span>
-                                            </div>
-                                        </Link>
-                                        <Link href="/quiz" className="group flex-1 min-w-[140px] sm:flex-none">
-                                            <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border-2 border-primary/10 text-primary transition-all hover:scale-105 active:scale-95 hover:bg-primary/5 hover:border-primary/20">
-                                                <BookOpenCheck className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Trắc nghiệm</span>
-                                            </div>
-                                        </Link>
-                                        <Link href="/writing" className="group flex-1 min-w-[140px] sm:flex-none">
-                                            <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border-2 border-primary/10 text-primary transition-all hover:scale-105 active:scale-95 hover:bg-primary/5 hover:border-primary/20">
-                                                <PenTool className="h-5 w-5 transition-transform group-hover:-rotate-12" />
-                                                <span className="text-xs font-bold uppercase tracking-wider">Tự luận</span>
-                                            </div>
-                                        </Link>
-                                    </nav>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        <Card className="h-full border-none shadow-xl shadow-stone-200/40 bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center p-8 text-center">
-                            <CardHeader className="p-0 mb-4">
-                                <CardTitle className="text-sm font-bold uppercase tracking-widest text-stone-400">
-                                    Tiến độ {activeTab === "kanji" ? "Kanji" : "Từ Vựng"}
-                                </CardTitle>
-                            </CardHeader>
-                            <ProgressChart learned={currentProgress.learned} total={currentProgress.total} />
-                        </Card>
-                    </motion.div>
-                </div>
+                <StudyDashboard
+                    kanjiCount={kanjiData.length}
+                    vocabCount={vocabularyData.length}
+                    activeTab={activeTab}
+                    currentProgress={currentProgress}
+                />
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-16">
                     <div className="flex justify-center mb-10">
@@ -353,32 +256,7 @@ export default function Home() {
                     <AnimatePresence mode="wait">
                         {(activeTab === "kanji" && currentIndex === null) ||
                         (activeTab === "vocab" && vocabIndex === null) ? (
-                            <motion.div
-                                key="empty"
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -30 }}
-                                className="flex flex-col items-center justify-center py-24 px-6 rounded-[3rem] border-2 border-dashed border-stone-200 bg-stone-50/30"
-                            >
-                                <div className="mb-8 p-6 bg-white rounded-full shadow-lg shadow-stone-200/50">
-                                    <LayoutGrid className="h-16 w-16 text-stone-200" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-stone-600 mb-2">
-                                    Bạn muốn học {activeTab === "kanji" ? "chữ Kanji" : "từ vựng"} nào?
-                                </h3>
-                                <p className="text-stone-400 font-medium mb-8">
-                                    Chọn một mục bên trên để bắt đầu khám phá chi tiết
-                                </p>
-
-                                <div className="flex flex-wrap justify-center gap-6 text-stone-400 text-center">
-                                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                                        <Keyboard size={16} /> Dùng phím mũi tên để chuyển nhanh
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                                        <Info size={16} /> Click và giữ để xem nhanh nghĩa
-                                    </div>
-                                </div>
-                            </motion.div>
+                            <StudyAreaPlaceholder activeTab={activeTab} />
                         ) : (
                             <motion.div
                                 key="detail-container"
@@ -411,43 +289,51 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                {activeTab === "kanji" && currentIndex !== null ? (
-                                    (() => {
-                                        const kanjiItem = kanjiData.find(k => k.id === currentIndex);
-                                        const kanjiIdx = kanjiData.findIndex(k => k.id === currentIndex);
-                                        if (!kanjiItem) return null;
-                                        return (
-                                            <KanjiDetail
-                                                data={kanjiItem}
-                                                currentIndex={kanjiIdx}
-                                                total={kanjiData.length}
-                                                isLearned={learned.has(currentIndex)}
-                                                masks={masks}
-                                                onToggleLearned={toggleLearned}
-                                                onNext={() => kanjiIdx < kanjiData.length - 1 && selectKanji(kanjiData[kanjiIdx + 1].id)}
-                                                onPrev={() => kanjiIdx > 0 && selectKanji(kanjiData[kanjiIdx - 1].id)}
-                                            />
-                                        );
-                                    })()
-                                ) : activeTab === "vocab" && vocabIndex !== null ? (
-                                    (() => {
-                                        const vocabItem = vocabularyData.find(v => v.id === vocabIndex);
-                                        const vocabIdx = vocabularyData.findIndex(v => v.id === vocabIndex);
-                                        if (!vocabItem) return null;
-                                        return (
-                                            <VocabDetail
-                                                data={vocabItem}
-                                                currentIndex={vocabIdx}
-                                                total={vocabularyData.length}
-                                                isLearned={learnedVocab.has(vocabIndex)}
-                                                masks={masks}
-                                                onToggleLearned={toggleLearned}
-                                                onNext={() => vocabIdx < vocabularyData.length - 1 && selectVocab(vocabularyData[vocabIdx + 1].id)}
-                                                onPrev={() => vocabIdx > 0 && selectVocab(vocabularyData[vocabIdx - 1].id)}
-                                            />
-                                        );
-                                    })()
-                                ) : null}
+                                {activeTab === "kanji" && currentIndex !== null
+                                    ? (() => {
+                                          const kanjiItem = kanjiData.find((k) => k.id === currentIndex);
+                                          const kanjiIdx = kanjiData.findIndex((k) => k.id === currentIndex);
+                                          if (!kanjiItem) return null;
+                                          return (
+                                              <KanjiDetail
+                                                  data={kanjiItem}
+                                                  currentIndex={kanjiIdx}
+                                                  total={kanjiData.length}
+                                                  isLearned={learned.has(currentIndex)}
+                                                  masks={masks}
+                                                  onToggleLearned={toggleLearned}
+                                                  onNext={() =>
+                                                      kanjiIdx < kanjiData.length - 1 &&
+                                                      selectKanji(kanjiData[kanjiIdx + 1].id)
+                                                  }
+                                                  onPrev={() => kanjiIdx > 0 && selectKanji(kanjiData[kanjiIdx - 1].id)}
+                                              />
+                                          );
+                                      })()
+                                    : activeTab === "vocab" && vocabIndex !== null
+                                      ? (() => {
+                                            const vocabItem = vocabularyData.find((v) => v.id === vocabIndex);
+                                            const vocabIdx = vocabularyData.findIndex((v) => v.id === vocabIndex);
+                                            if (!vocabItem) return null;
+                                            return (
+                                                <VocabDetail
+                                                    data={vocabItem}
+                                                    currentIndex={vocabIdx}
+                                                    total={vocabularyData.length}
+                                                    isLearned={learnedVocab.has(vocabIndex)}
+                                                    masks={masks}
+                                                    onToggleLearned={toggleLearned}
+                                                    onNext={() =>
+                                                        vocabIdx < vocabularyData.length - 1 &&
+                                                        selectVocab(vocabularyData[vocabIdx + 1].id)
+                                                    }
+                                                    onPrev={() =>
+                                                        vocabIdx > 0 && selectVocab(vocabularyData[vocabIdx - 1].id)
+                                                    }
+                                                />
+                                            );
+                                        })()
+                                      : null}
                             </motion.div>
                         )}
                     </AnimatePresence>
