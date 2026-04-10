@@ -1,3 +1,8 @@
+// @ts-ignore
+import Kuroshiro from "kuroshiro";
+// @ts-ignore
+import Analyzer from "kuroshiro-analyzer-kuromoji";
+
 const romajiToHiraganaMap: { [key: string]: string } = {
     'a': 'あ', 'i': 'い', 'u': 'う', 'e': 'え', 'o': 'お',
     'ka': 'か', 'ki': 'き', 'ku': 'く', 'ke': 'け', 'ko': 'こ',
@@ -5,7 +10,7 @@ const romajiToHiraganaMap: { [key: string]: string } = {
     'ta': 'た', 'chi': 'ち', 'tsu': 'つ', 'te': 'て', 'to': 'と',
     'na': 'な', 'ni': 'に', 'nu': 'ぬ', 'ne': 'ね', 'no': 'の',
     'ha': 'は', 'hi': 'ひ', 'fu': 'ふ', 'he': 'he', 'ho': 'ほ',
-    'ma': 'ま', 'mi': 'み', 'mu': 'む', 'me': 'め', 'mo': 'も',
+    'ma': 'ま', 'mi': 'み', 'mu': 'む', 'me': 'me', 'mo': 'も',
     'ya': 'や', 'yu': 'ゆ', 'yo': 'よ',
     'ra': 'ら', 'ri': 'り', 'ru': 'る', 're': 'れ', 'ro': 'ろ',
     'wa': 'わ', 'wo': 'を', 'nn': 'ん',
@@ -27,6 +32,75 @@ const romajiToHiraganaMap: { [key: string]: string } = {
     'pya': 'ぴゃ', 'pyu': 'pyu', 'pyo': 'pyo',
     'tsa': 'つぁ', 'tsi': 'つぃ', 'tse': 'つぇ', 'tso': 'つぉ',
 };
+
+// Singleton instance for Kuroshiro
+let kuroshiroInstance: any = null;
+let isInitializing = false;
+
+/**
+ * Khởi tạo Kuroshiro với Kuromoji analyzer
+ */
+async function initKuroshiro() {
+    if (kuroshiroInstance) return kuroshiroInstance;
+    if (isInitializing) {
+        // Đợi khởi tạo hoàn thành
+        while (isInitializing) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return kuroshiroInstance;
+    }
+
+    isInitializing = true;
+    try {
+        const kuroshiro = new Kuroshiro();
+        await kuroshiro.init(new Analyzer({
+            dictPath: "/dict" // Path to the public/dict folder
+        }));
+        kuroshiroInstance = kuroshiro;
+        return kuroshiroInstance;
+    } catch (error) {
+        console.error("Failed to initialize Kuroshiro:", error);
+        return null;
+    } finally {
+        isInitializing = false;
+    }
+}
+
+/**
+ * Chuyển đổi Kanji sang Hiragana (Furigana)
+ * Sử dụng localStorage để cache kết quả
+ */
+export async function getFurigana(text: string): Promise<string> {
+    if (!text) return "";
+
+    // 1. Kiểm tra cache
+    const cacheKey = `furigana_${text}`;
+    if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) return cached;
+    }
+
+    // 2. Chuyển đổi nếu chưa có trong cache
+    try {
+        const kuroshiro = await initKuroshiro();
+        if (!kuroshiro) return text;
+
+        const result = await kuroshiro.convert(text, {
+            to: "hiragana",
+            mode: "normal"
+        });
+
+        // 3. Lưu vào cache
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(cacheKey, result);
+        }
+
+        return result;
+    } catch (error) {
+        console.error("Furigana conversion error:", error);
+        return text;
+    }
+}
 
 /**
  * A more robust Romaji to Hiragana converter for real-time typing.

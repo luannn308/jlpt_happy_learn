@@ -7,9 +7,7 @@ import { VocabularyItem } from "@/data/vocabulary";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { BookOpen, RotateCcw, PenTool } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toHiragana } from "@/lib/japanese";
 import { Input } from "@/components/ui/input";
@@ -17,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import PracticeFinished from "@/components/quiz/shared/PracticeFinished";
 import PracticeHeader from "@/components/quiz/shared/PracticeHeader";
 import PracticeFeedback from "@/components/quiz/shared/PracticeFeedback";
+import FuriganaText from "@/components/common/FuriganaText";
 
 type VocabMode = "word-to-reading" | "meaning-to-word" | "word-to-meaning";
 
@@ -29,6 +28,7 @@ const VOCAB_MODES = [
 export default function VocabWriting() {
     const { vocabularyData, isLoading } = useData();
     const [mode, setMode] = useState<VocabMode>("word-to-reading");
+    const [showAll, setShowAll] = useState(false);
 
     const [queue, setQueue] = useState<VocabularyItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,19 +43,26 @@ export default function VocabWriting() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const startPractice = useCallback(() => {
-        const shuffled = [...vocabularyData.filter(v => !v.isLearned)]
-            .sort(() => Math.random() - 0.5);
+        const pool = showAll ? vocabularyData : vocabularyData.filter(v => !v.isLearned);
+        console.log("[DEBUG] VocabWriting Pool:", pool.length, "showAll:", showAll);
         
-        setQueue(shuffled);
+        // Reset states at the beginning
+        setScore(0);
+        setTotalAttempted(0);
         setCurrentIndex(0);
         setUserInput("");
         setIsCorrect(null);
         setPenaltyTimer(0);
         setShowAnswer(false);
         setFinished(false);
-        setScore(0);
-        setTotalAttempted(0);
-    }, [vocabularyData]);
+
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        
+        if (shuffled.length === 0) {
+            setFinished(true);
+        }
+        setQueue(shuffled);
+    }, [vocabularyData, showAll]);
 
     useEffect(() => {
         startPractice();
@@ -96,8 +103,6 @@ export default function VocabWriting() {
         if (penaltyTimer > 0 || !currentVocab) return;
 
         const inputNormalized = normalize(userInput);
-        
-        // Logic kiểm tra linh hoạt
         let isMatch = false;
         
         if (mode === "word-to-meaning") {
@@ -139,7 +144,6 @@ export default function VocabWriting() {
                 inputRef.current.focus();
             }
         }, 600); 
-
         return () => clearTimeout(timer);
     }, [currentIndex, finished, mode, penaltyTimer]);
 
@@ -163,17 +167,6 @@ export default function VocabWriting() {
         setTimeout(() => inputRef.current?.focus(), 10);
     };
 
-    if (finished) {
-        return (
-            <PracticeFinished 
-                score={score} 
-                totalAttempted={totalAttempted} 
-                onRetry={startPractice} 
-                title="Hoàn thành tự luận Từ vựng!"
-            />
-        );
-    }
-
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full max-w-2xl mx-auto p-4 space-y-8">
@@ -183,13 +176,11 @@ export default function VocabWriting() {
         );
     }
 
-    if (!currentVocab) return null;
-
     return (
         <div className="w-full space-y-8">
             <PracticeHeader 
                 icon={BookOpen}
-                title="Tự luận Từ vựng"
+                title="Tự luận Từ vựng N3"
                 description={
                     mode === "word-to-reading" 
                         ? "Từ → Đọc" 
@@ -202,82 +193,101 @@ export default function VocabWriting() {
                 onModeChange={(newMode) => setMode(newMode as any)}
                 currentIndex={currentIndex}
                 total={queue.length}
+                showAll={showAll}
+                onShowAllChange={setShowAll}
             />
 
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={currentIndex + mode}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="space-y-8"
-                >
-                    <Card className="border-none shadow-2xl shadow-stone-200/50 bg-white rounded-[3rem] p-8 md:p-12">
-                        <CardContent className="p-0 flex flex-col items-center space-y-10">
-                            <div className="text-center space-y-4">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 Vietnamese-Content">
-                                    {mode === "word-to-reading" 
-                                        ? "Cách đọc của từ này là gì?" 
-                                        : mode === "meaning-to-word"
-                                          ? "Từ vựng có nghĩa này là gì?"
-                                          : "Nghĩa tiếng Việt của từ này là gì?"}
-                                </span>
-                                <h2 className="font-black text-stone-900 leading-tight text-6xl md:text-7xl font-kanji">
-                                    {mode === "word-to-meaning" || mode === "word-to-reading" ? currentVocab.word : currentVocab.meaning}
-                                </h2>
-                                {(mode === "word-to-reading" || mode === "word-to-meaning") && (
-                                    <p className="text-stone-400 lowercase font-medium Vietnamese-Content">
-                                        {mode === "word-to-reading" ? `(${currentVocab.meaning})` : `(${currentVocab.reading})`}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="w-full max-w-sm space-y-6">
-                                <form onSubmit={(e) => handleCheck(e as any)} className="relative">
-                                    <Input
-                                        ref={inputRef}
-                                        value={userInput}
-                                        onChange={(e) => handleInputChange(e.target.value)}
-                                        disabled={penaltyTimer > 0 || isCorrect === true}
-                                        placeholder={
-                                            mode === "word-to-meaning" 
-                                                ? "Nhập nghĩa tiếng Việt..." 
-                                                : "Nhập đáp án..."
-                                        }
-                                        className={cn(
-                                            "h-16 rounded-2xl text-center text-2xl font-bold border-2 transition-all duration-300",
-                                            isCorrect === true
-                                                ? "border-green-500 bg-green-50 text-green-700 Vietnamese-Content"
-                                                : isCorrect === false
-                                                  ? "border-red-500 bg-red-50 text-red-700 Vietnamese-Content"
-                                                  : "border-stone-100 focus:border-primary focus:ring-4 focus:ring-primary/10",
+            {finished ? (
+                <PracticeFinished 
+                    score={score} 
+                    totalAttempted={totalAttempted} 
+                    onRetry={startPractice} 
+                    onReviewAll={() => setShowAll(true)}
+                    title="Hoàn thành tự luận Từ vựng!"
+                />
+            ) : (
+                currentVocab && (
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentIndex + mode}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.05 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Card className="border-none shadow-2xl shadow-stone-200/60 bg-white rounded-[3rem] p-8 md:p-12 overflow-hidden border border-stone-100">
+                                <CardContent className="p-0 flex flex-col items-center space-y-10">
+                                    <div className="text-center space-y-4">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 Vietnamese-Content">
+                                            {mode === "word-to-reading" 
+                                                ? "Cách đọc của từ này là gì?" 
+                                                : mode === "meaning-to-word"
+                                                  ? "Từ vựng có nghĩa này là gì?"
+                                                  : "Nghĩa tiếng Việt của từ này là gì?"}
+                                        </span>
+                                        <h2 className={cn(
+                                            "font-black text-stone-900 leading-tight",
+                                            mode === "meaning-to-word" ? "text-4xl md:text-5xl Vietnamese-Content" : "text-6xl md:text-8xl font-kanji"
+                                        )}>
+                                            {mode === "word-to-meaning" || mode === "word-to-reading" ? currentVocab.word : currentVocab.meaning}
+                                        </h2>
+                                        {(mode === "word-to-reading" || mode === "word-to-meaning") && (
+                                            <p className="text-stone-400 lowercase font-medium Vietnamese-Content">
+                                                {mode === "word-to-reading" ? `(${currentVocab.meaning})` : `(${currentVocab.reading})`}
+                                            </p>
                                         )}
-                                    />
-                                </form>
+                                    </div>
 
-                                <PracticeFeedback 
-                                    penaltyTimer={penaltyTimer}
-                                    showAnswer={showAnswer}
-                                    isCorrect={isCorrect}
-                                    correctAnswer={getCorrectAnswer()}
-                                    onRetry={handleRetryAfterPenalty}
-                                    extraContent={showAnswer && (
-                                        <div className="space-y-2 text-left">
-                                            <p className="text-2xl font-black text-stone-900 font-kanji text-center">{currentVocab.word}</p>
-                                            <div className="pt-2 border-t border-stone-200">
-                                                <p className="text-sm text-stone-500 italic Vietnamese-Content">{currentVocab.example}</p>
-                                                <p className="text-xs text-stone-400 Vietnamese-Content">{currentVocab.exampleMeaning}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </AnimatePresence>
+                                    <div className="w-full max-w-sm space-y-6">
+                                        <form onSubmit={(e) => handleCheck(e as any)} className="relative">
+                                            <Input
+                                                ref={inputRef}
+                                                value={userInput}
+                                                onChange={(e) => handleInputChange(e.target.value)}
+                                                disabled={penaltyTimer > 0 || isCorrect === true}
+                                                placeholder={
+                                                    mode === "word-to-meaning" 
+                                                        ? "Nhập nghĩa tiếng Việt..." 
+                                                        : "Nhập đáp án..."
+                                                }
+                                                className={cn(
+                                                    "h-16 rounded-2xl text-center text-2xl font-bold border-2 transition-all duration-300",
+                                                    isCorrect === true
+                                                        ? "border-green-500 bg-green-50 text-green-700 Vietnamese-Content"
+                                                        : isCorrect === false
+                                                          ? "border-red-500 bg-red-50 text-red-700 Vietnamese-Content"
+                                                          : "border-stone-100 focus:border-primary focus:ring-4 focus:ring-primary/10",
+                                                )}
+                                            />
+                                        </form>
+
+                                        <PracticeFeedback 
+                                            penaltyTimer={penaltyTimer}
+                                            showAnswer={showAnswer}
+                                            isCorrect={isCorrect}
+                                            correctAnswer={getCorrectAnswer()}
+                                            onRetry={handleRetryAfterPenalty}
+                                            extraContent={showAnswer && (
+                                                <div className="space-y-4 text-left">
+                                                    <p className="text-2xl font-black text-stone-900 font-kanji text-center">{currentVocab.word}</p>
+                                                    <div className="pt-4 border-t border-stone-200">
+                                                        <FuriganaText 
+                                                            text={currentVocab.example || ""} 
+                                                            className="text-base font-bold text-stone-700 leading-relaxed Vietnamese-Content"
+                                                            furiganaClassName="text-xs"
+                                                        />
+                                                        <p className="text-xs text-stone-400 mt-1 Vietnamese-Content italic">"{currentVocab.exampleMeaning}"</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </AnimatePresence>
+                )
+            )}
         </div>
     );
 }
-
-

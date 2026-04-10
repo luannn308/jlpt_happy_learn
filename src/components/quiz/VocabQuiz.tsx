@@ -41,8 +41,11 @@ export default function VocabQuiz() {
     const [completedCount, setCompletedCount] = useState(0);
     const [hasFailedCurrent, setHasFailedCurrent] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [showAll, setShowAll] = useState(false);
 
-    const poolLength = useMemo(() => vocabularyData.filter((v) => !v.isLearned).length, [vocabularyData]);
+    const poolLength = useMemo(() => {
+        return showAll ? vocabularyData.length : vocabularyData.filter((v) => !v.isLearned).length;
+    }, [vocabularyData, showAll]);
 
     // Audio Context Utility (Reused from KanjiQuiz)
     const playSFX = useCallback(
@@ -142,12 +145,20 @@ export default function VocabQuiz() {
             reading: vocab.reading,
             han: vocab.han,
         };
-    }, []);
+    }, [vocabularyData]);
 
     const startQuiz = useCallback(
         (mode: VocabQuizMode = quizMode) => {
-            // Filter only non-learned words
-            const pool = vocabularyData.filter((v) => !v.isLearned);
+            // Filter words based on showAll
+            const pool = showAll ? vocabularyData : vocabularyData.filter((v) => !v.isLearned);
+
+            console.log("[DEBUG] VocabQuiz Pool:", pool.length, "showAll:", showAll);
+
+            // Reset states at the beginning
+            setCompletedCount(0);
+            setScore(0);
+            setOriginalQuestions([]);
+            setQueue([]);
 
             if (pool.length === 0) {
                 setQuizFinished(true);
@@ -173,20 +184,18 @@ export default function VocabQuiz() {
             const shuffledQuestions = [...newQuestions].sort(() => Math.random() - 0.5);
             setOriginalQuestions(shuffledQuestions);
             setQueue(shuffledQuestions);
-            setCompletedCount(0);
-            setScore(0);
             setQuizFinished(false);
             setIsAnswered(false);
             setSelectedAnswer(null);
             setHasFailedCurrent(false);
             setCurrentQuestion(shuffledQuestions[0] || null);
         },
-        [quizMode, generateQuestion],
+        [quizMode, showAll, vocabularyData, generateQuestion],
     );
 
     useEffect(() => {
         startQuiz();
-    }, [startQuiz]);
+    }, [startQuiz, showAll]);
 
     const handleAnswer = (answer: string) => {
         if (isAnswered || !currentQuestion) return;
@@ -248,12 +257,52 @@ export default function VocabQuiz() {
     const progress = (completedCount / totalQuestions) * 100;
 
     if (quizFinished) {
+        if (originalQuestions.length === 0) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[600px] w-full max-w-2xl mx-auto p-4 text-center space-y-8">
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="space-y-6"
+                    >
+                        <div className="relative inline-block">
+                            <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
+                            <Sparkles className="relative h-24 w-24 text-primary mx-auto" />
+                        </div>
+                        <h2 className="text-4xl font-black text-stone-900 Vietnamese-Content">Tuyệt vời!</h2>
+                        <p className="text-xl text-stone-600 font-medium Vietnamese-Content">
+                            Bạn đã học hết tất cả các từ vựng hiện có. <br />
+                            Hãy quay lại sau hoặc ôn tập các từ đã học nhé!
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Button
+                                onClick={() => setShowAll(true)}
+                                size="lg"
+                                className="bg-primary text-white hover:bg-primary/90 rounded-2xl h-16 px-10 font-bold flex gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                            >
+                                <RotateCcw size={20} /> Ôn tập lại ngay
+                            </Button>
+                            <Link href="/">
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="border-stone-200 hover:bg-stone-50 rounded-2xl h-16 px-10 font-bold flex gap-2 text-stone-600 transition-all"
+                                >
+                                    <Home size={20} /> Quay về trang chủ
+                                </Button>
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        }
+
         return (
-            <div className="flex flex-col items-center justify-center min-h-[600px] w-full max-w-2xl mx-auto p-4">
+            <div className="flex flex-col items-center justify-center min-h-[600px] w-full max-w-2xl mx-auto p-4 text-center">
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-full text-center space-y-8"
+                    className="w-full space-y-8"
                 >
                     <div className="relative inline-block">
                         <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
@@ -262,12 +311,10 @@ export default function VocabQuiz() {
 
                     <div className="space-y-2">
                         <h2 className="text-4xl font-black text-stone-900 Vietnamese-Content">
-                            {poolLength === 0 && originalQuestions.length === 0
-                                ? "Bạn đã học hết từ vựng!"
-                                : "Hoàn thành Quiz Từ vựng!"}
+                            Hoàn thành Quiz Từ vựng!
                         </h2>
                         <p className="text-stone-500 font-medium Vietnamese-Content">
-                            {originalQuestions.length > 0 && `Bạn đã trả lời đúng ${score}/${totalQuestions} câu hỏi.`}
+                            Bạn đã trả lời đúng {score}/{totalQuestions} câu hỏi.
                         </p>
                     </div>
 
@@ -361,36 +408,52 @@ export default function VocabQuiz() {
 
                 {/* Tabs for Quiz Mode */}
                 {!isAnswered && completedCount === 0 && (
-                    <Tabs
-                        value={quizMode}
-                        onValueChange={(v) => {
-                            const newMode = v as VocabQuizMode;
-                            setQuizMode(newMode);
-                            startQuiz(newMode);
-                        }}
-                        className="w-full flex justify-center"
-                    >
-                        <TabsList className="bg-stone-100/80 p-1 h-12 rounded-2xl border border-stone-200 shadow-sm Vietnamese-Content">
-                            <TabsTrigger
-                                value="all"
-                                className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                Tất cả
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="meaning"
-                                className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                Nghĩa
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="reading"
-                                className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                Cách đọc
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+                    <div className="flex flex-col items-center gap-6 w-full">
+                        <Tabs
+                            value={quizMode}
+                            onValueChange={(v) => {
+                                const newMode = v as VocabQuizMode;
+                                setQuizMode(newMode);
+                                startQuiz(newMode);
+                            }}
+                            className="w-full flex justify-center"
+                        >
+                            <TabsList className="bg-stone-100/80 p-1 h-12 rounded-2xl border border-stone-200 shadow-sm Vietnamese-Content">
+                                <TabsTrigger
+                                    value="all"
+                                    className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    Tất cả
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="meaning"
+                                    className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    Nghĩa
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="reading"
+                                    className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    Cách đọc
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+
+                        {/* Show All Toggle */}
+                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-stone-100">
+                            <input
+                                type="checkbox"
+                                id="showAll"
+                                checked={showAll}
+                                onChange={(e) => setShowAll(e.target.checked)}
+                                className="w-4 h-4 rounded border-stone-300 text-primary focus:ring-primary cursor-pointer"
+                            />
+                            <label htmlFor="showAll" className="text-sm font-bold text-stone-600 cursor-pointer">
+                                Ôn tập tất cả (bao gồm từ đã thuộc)
+                            </label>
+                        </div>
+                    </div>
                 )}
             </div>
 

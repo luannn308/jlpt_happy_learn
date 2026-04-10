@@ -10,13 +10,14 @@ interface PracticeFinishedProps {
     score: number;
     totalAttempted: number;
     onRetry: () => void;
+    onReviewAll?: () => void;
     title?: string;
 }
-
 export default function PracticeFinished({ 
     score, 
     totalAttempted, 
     onRetry,
+    onReviewAll,
     title = "Hoàn thành luyện tập!"
 }: PracticeFinishedProps) {
     const accuracy = totalAttempted > 0 ? Math.round((score / totalAttempted) * 100) : 0;
@@ -47,16 +48,25 @@ export default function PracticeFinished({
                 </Card>
             </div>
 
-            <div className="flex gap-4">
-                <Button
-                    onClick={onRetry}
-                    className="bg-primary text-white h-14 px-8 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all"
-                >
-                    <RotateCcw className="mr-2 h-5 w-5" /> <span className="Vietnamese-Content">Luyện tập lại</span>
-                </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+                {totalAttempted === 0 && onReviewAll ? (
+                    <Button
+                        onClick={onReviewAll}
+                        className="bg-primary text-white h-14 px-8 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all text-sm Vietnamese-Content"
+                    >
+                        <RotateCcw className="mr-2 h-5 w-5" /> Ôn tập tất cả ngay
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={onRetry}
+                        className="bg-primary text-white h-14 px-8 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all text-sm"
+                    >
+                        <RotateCcw className="mr-2 h-5 w-5" /> <span className="Vietnamese-Content">Luyện tập lại</span>
+                    </Button>
+                )}
                 <Button
                     variant="outline"
-                    className="h-14 px-8 rounded-2xl font-bold border-stone-200"
+                    className="h-14 px-8 rounded-2xl font-bold border-stone-200 text-sm"
                     onClick={() => (window.location.href = "/")}
                 >
                     <span className="Vietnamese-Content">Quay về trang chủ</span>

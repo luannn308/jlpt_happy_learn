@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import FuriganaText from "@/components/common/FuriganaText";
 
 interface VocabDetailProps {
     data: VocabularyItem;
@@ -132,9 +133,11 @@ export default function VocabDetail({
                                     </div>
                                     <Card className="border-stone-100 bg-white shadow-sm rounded-[2rem] overflow-hidden border-2">
                                         <CardContent className="p-8 space-y-6">
-                                            <p className="text-2xl md:text-3xl font-bold leading-relaxed text-stone-800 font-kanji">
-                                                {data.example}
-                                            </p>
+                                            <FuriganaText 
+                                                text={data.example} 
+                                                className="text-2xl md:text-3xl font-bold leading-relaxed text-stone-800"
+                                                furiganaClassName="text-sm"
+                                            />
                                             <Separator className="bg-stone-50" />
                                             <p className="text-lg md:text-xl font-medium italic text-stone-500 leading-relaxed Vietnamese-Content">
                                                 "{data.exampleMeaning}"

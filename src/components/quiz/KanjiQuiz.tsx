@@ -51,6 +51,7 @@ export default function KanjiQuiz() {
     const [completedCount, setCompletedCount] = useState(0);
     const [hasFailedCurrent, setHasFailedCurrent] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [showAll, setShowAll] = useState(false);
 
     // Audio Context Utility
     const playSFX = useCallback(
@@ -127,13 +128,122 @@ export default function KanjiQuiz() {
         return matches.map((m) => m.replace(/<\/?strong>/g, ""));
     };
 
+    const generateQuestion = useCallback(
+        (kanji: KanjiData, type: QuestionType): Question => {
+            let questionText = "";
+            let correctAnswer = "";
+            let options: string[] = [];
+
+            const radicals = getRadicals(kanji.component);
+
+            // Find similar distractors based on radicals
+            const findDistractors = (field: keyof KanjiData, count: number) => {
+                let similar = kanjiData.filter(
+                    (k) => k.id !== kanji.id && getRadicals(k.component).some((r) => radicals.includes(r)),
+                );
+
+                if (similar.length < count) {
+                    // Add random distractors if not enough similar ones
+                    const others = kanjiData.filter((k) => k.id !== kanji.id && !similar.includes(k));
+                    similar = [...similar, ...others.sort(() => Math.random() - 0.5)];
+                }
+
+                return similar.slice(0, count).map((k) => k[field] as string);
+            };
+
+            if (type === "han-viet") {
+                questionText = `${kanji.kanji}`;
+                correctAnswer = kanji.han;
+                options = [correctAnswer, ...findDistractors("han", 3)];
+            } else if (type === "reading") {
+                questionText = `${kanji.kanji}`;
+                correctAnswer = kanji.on !== "Không có" ? kanji.on : kanji.kun;
+                const dists = kanjiData
+                    .filter((k) => k.id !== kanji.id)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map((k) => (k.on !== "Không có" ? k.on : k.kun));
+                options = [correctAnswer, ...dists];
+            } else if (type === "face") {
+                questionText = `${kanji.han}`;
+                correctAnswer = kanji.kanji;
+                options = [correctAnswer, ...findDistractors("kanji", 3)];
+            } else if (type === "on-yomi") {
+                questionText = `${kanji.kanji}`;
+                correctAnswer = kanji.on;
+                const dists = kanjiData
+                    .filter((k) => k.id !== kanji.id && k.on !== "Không có")
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map((k) => k.on);
+                options = [correctAnswer, ...dists];
+            } else if (type === "kun-yomi") {
+                questionText = `${kanji.kanji}`;
+                correctAnswer = kanji.kun;
+                const dists = kanjiData
+                    .filter((k) => k.id !== kanji.id && k.kun !== "Không có")
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map((k) => k.kun);
+                options = [correctAnswer, ...dists];
+            } else if (type === "vocab-reading") {
+                const v = kanji.vocab[Math.floor(Math.random() * kanji.vocab.length)];
+                questionText = `${v.word}`;
+                correctAnswer = v.reading;
+                const dists = kanjiData
+                    .flatMap((k) => k.vocab)
+                    .filter((vocab) => vocab.word !== v.word)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map((vocab) => vocab.reading);
+                options = [correctAnswer, ...dists];
+            } else if (type === "vocab-meaning") {
+                const v = kanji.vocab[Math.floor(Math.random() * kanji.vocab.length)];
+                questionText = `${v.word}`;
+                correctAnswer = v.meaning;
+                const dists = kanjiData
+                    .flatMap((k) => k.vocab)
+                    .filter((vocab) => vocab.word !== v.word)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                    .map((vocab) => vocab.meaning);
+                options = [correctAnswer, ...dists];
+            }
+
+            return {
+                kanjiId: kanji.id,
+                type,
+                questionText,
+                correctAnswer,
+                options: options.sort(() => Math.random() - 0.5),
+                reading:
+                    type === "vocab-reading" || type === "vocab-meaning"
+                        ? kanji.vocab.find((v) => v.word === questionText)?.reading || ""
+                        : kanji.on !== "Không có"
+                          ? kanji.on
+                          : kanji.kun,
+                han: kanji.han,
+            };
+        },
+        [kanjiData],
+    );
+
     const startQuiz = useCallback(
         (mode: QuizMode = quizMode) => {
-            // 1. Get 10 random kanji that are NOT learned (isLearned: false/undefined AND not in localStorage)
             const savedKanji = localStorage.getItem("jlpt_learned_kanji");
             const learnedIds = savedKanji ? JSON.parse(savedKanji) : [];
 
-            const pool = kanjiData.filter((k) => !k.isLearned && !learnedIds.includes(k.id));
+            const pool = showAll
+                ? kanjiData
+                : kanjiData.filter((k) => !k.isLearned && !learnedIds.includes(k.id));
+
+            console.log("[DEBUG] KanjiQuiz Pool:", pool.length, "showAll:", showAll);
+
+            // Reset states at the beginning
+            setCompletedCount(0);
+            setScore(0);
+            setOriginalQuestions([]);
+            setQueue([]);
 
             if (pool.length === 0) {
                 setQuizFinished(true);
@@ -141,10 +251,12 @@ export default function KanjiQuiz() {
             }
 
             const selectedKanji = [...pool].sort(() => Math.random() - 0.5);
+            // Limit to 10 avoid lag if showAll is true
+            const limitedKanji = selectedKanji.slice(0, 10);
 
             const newQuestions: Question[] = [];
 
-            selectedKanji.forEach((k) => {
+            limitedKanji.forEach((k) => {
                 if (mode === "all" || mode === "han-viet") {
                     newQuestions.push(generateQuestion(k, "han-viet"));
                     newQuestions.push(generateQuestion(k, "face"));
@@ -171,117 +283,18 @@ export default function KanjiQuiz() {
             const shuffledQuestions = [...newQuestions].sort(() => Math.random() - 0.5);
             setOriginalQuestions(shuffledQuestions);
             setQueue(shuffledQuestions);
-            setCompletedCount(0);
-            setScore(0);
             setQuizFinished(false);
             setIsAnswered(false);
             setSelectedAnswer(null);
             setHasFailedCurrent(false);
             setCurrentQuestion(null); // Reset current question to trigger useEffect
         },
-        [quizMode],
+        [quizMode, showAll, kanjiData, generateQuestion],
     );
-
-    const generateQuestion = (kanji: KanjiData, type: QuestionType): Question => {
-        let questionText = "";
-        let correctAnswer = "";
-        let options: string[] = [];
-
-        const radicals = getRadicals(kanji.component);
-
-        // Find similar distractors based on radicals
-        const findDistractors = (field: keyof KanjiData, count: number) => {
-            let similar = kanjiData.filter(
-                (k) => k.id !== kanji.id && getRadicals(k.component).some((r) => radicals.includes(r)),
-            );
-
-            if (similar.length < count) {
-                // Add random distractors if not enough similar ones
-                const others = kanjiData.filter((k) => k.id !== kanji.id && !similar.includes(k));
-                similar = [...similar, ...others.sort(() => Math.random() - 0.5)];
-            }
-
-            return similar.slice(0, count).map((k) => k[field] as string);
-        };
-
-        if (type === "han-viet") {
-            questionText = `${kanji.kanji}`;
-            correctAnswer = kanji.han;
-            options = [correctAnswer, ...findDistractors("han", 3)];
-        } else if (type === "reading") {
-            questionText = `${kanji.kanji}`;
-            correctAnswer = kanji.on !== "Không có" ? kanji.on : kanji.kun;
-            const dists = kanjiData
-                .filter((k) => k.id !== kanji.id)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 3)
-                .map((k) => (k.on !== "Không có" ? k.on : k.kun));
-            options = [correctAnswer, ...dists];
-        } else if (type === "face") {
-            questionText = `${kanji.han}`;
-            correctAnswer = kanji.kanji;
-            options = [correctAnswer, ...findDistractors("kanji", 3)];
-        } else if (type === "on-yomi") {
-            questionText = `${kanji.kanji}`;
-            correctAnswer = kanji.on;
-            const dists = kanjiData
-                .filter((k) => k.id !== kanji.id && k.on !== "Không có")
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 3)
-                .map((k) => k.on);
-            options = [correctAnswer, ...dists];
-        } else if (type === "kun-yomi") {
-            questionText = `${kanji.kanji}`;
-            correctAnswer = kanji.kun;
-            const dists = kanjiData
-                .filter((k) => k.id !== kanji.id && k.kun !== "Không có")
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 3)
-                .map((k) => k.kun);
-            options = [correctAnswer, ...dists];
-        } else if (type === "vocab-reading") {
-            const v = kanji.vocab[Math.floor(Math.random() * kanji.vocab.length)];
-            questionText = `${v.word}`;
-            correctAnswer = v.reading;
-            const dists = kanjiData
-                .flatMap((k) => k.vocab)
-                .filter((vocab) => vocab.word !== v.word)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 3)
-                .map((vocab) => vocab.reading);
-            options = [correctAnswer, ...dists];
-        } else if (type === "vocab-meaning") {
-            const v = kanji.vocab[Math.floor(Math.random() * kanji.vocab.length)];
-            questionText = `${v.word}`;
-            correctAnswer = v.meaning;
-            const dists = kanjiData
-                .flatMap((k) => k.vocab)
-                .filter((vocab) => vocab.word !== v.word)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 3)
-                .map((vocab) => vocab.meaning);
-            options = [correctAnswer, ...dists];
-        }
-
-        return {
-            kanjiId: kanji.id,
-            type,
-            questionText,
-            correctAnswer,
-            options: options.sort(() => Math.random() - 0.5),
-            reading:
-                type === "vocab-reading" || type === "vocab-meaning"
-                    ? kanji.vocab.find((v) => v.word === questionText)?.reading || ""
-                    : kanji.on !== "Không có"
-                      ? kanji.on
-                      : kanji.kun,
-            han: kanji.han,
-        };
-    };
 
     useEffect(() => {
         startQuiz();
-    }, [startQuiz]);
+    }, [startQuiz, showAll]);
 
     useEffect(() => {
         if (queue.length > 0 && !currentQuestion) {
@@ -372,14 +385,24 @@ export default function KanjiQuiz() {
                             Bạn đã học hết tất cả các chữ Kanji hiện có. <br />
                             Hãy quay lại sau hoặc ôn tập các từ đã học nhé!
                         </p>
-                        <Link href="/">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button
+                                onClick={() => setShowAll(true)}
                                 size="lg"
-                                className="bg-primary text-white hover:bg-primary/90 rounded-2xl h-16 px-10 font-bold flex gap-2 mx-auto shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                                className="bg-primary text-white hover:bg-primary/90 rounded-2xl h-16 px-10 font-bold flex gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                             >
-                                <Home size={20} /> Quay về trang chủ
+                                <RotateCcw size={20} /> Ôn tập lại ngay
                             </Button>
-                        </Link>
+                            <Link href="/">
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="border-stone-200 hover:bg-stone-50 rounded-2xl h-16 px-10 font-bold flex gap-2 text-stone-600 transition-all"
+                                >
+                                    <Home size={20} /> Quay về trang chủ
+                                </Button>
+                            </Link>
+                        </div>
                     </motion.div>
                 </div>
             );
@@ -495,42 +518,58 @@ export default function KanjiQuiz() {
 
                 {/* Tabs for Quiz Mode */}
                 {!isAnswered && completedCount === 0 && (
-                    <Tabs
-                        value={quizMode}
-                        onValueChange={(v) => {
-                            const newMode = v as QuizMode;
-                            setQuizMode(newMode);
-                            startQuiz(newMode);
-                        }}
-                        className="w-full flex justify-center"
-                    >
-                        <TabsList className="bg-stone-100/80 p-1 h-12 rounded-2xl border border-stone-200 shadow-sm Vietnamese-Content">
-                            <TabsTrigger
-                                value="all"
-                                className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                Tất cả
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="han-viet"
-                                className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                Âm Hán
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="on-kun"
-                                className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                On/Kun
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="vocab"
-                                className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                            >
-                                Từ vựng
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+                    <div className="flex flex-col items-center gap-6 w-full">
+                        <Tabs
+                            value={quizMode}
+                            onValueChange={(v) => {
+                                const newMode = v as QuizMode;
+                                setQuizMode(newMode);
+                                startQuiz(newMode);
+                            }}
+                            className="w-full flex justify-center"
+                        >
+                            <TabsList className="bg-stone-100/80 p-1 h-12 rounded-2xl border border-stone-200 shadow-sm Vietnamese-Content">
+                                <TabsTrigger
+                                    value="all"
+                                    className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    Tất cả
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="han-viet"
+                                    className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    Âm Hán
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="on-kun"
+                                    className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    On/Kun
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="vocab"
+                                    className="rounded-xl px-4 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                                >
+                                    Từ vựng
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+
+                        {/* Show All Toggle */}
+                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-stone-100">
+                            <input
+                                type="checkbox"
+                                id="showAll"
+                                checked={showAll}
+                                onChange={(e) => setShowAll(e.target.checked)}
+                                className="w-4 h-4 rounded border-stone-300 text-primary focus:ring-primary cursor-pointer"
+                            />
+                            <label htmlFor="showAll" className="text-sm font-bold text-stone-600 cursor-pointer">
+                                Ôn tập tất cả (bao gồm từ đã thuộc)
+                            </label>
+                        </div>
+                    </div>
                 )}
             </div>
 

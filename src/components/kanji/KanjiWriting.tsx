@@ -6,10 +6,8 @@ import { useData } from "@/context/DataContext";
 import { KanjiData } from "@/data/kanji";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { PenTool, ArrowRight, RotateCcw, Sparkles, CheckCircle2, Timer, History } from "lucide-react";
+import { PenTool, ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toHiragana } from "@/lib/japanese";
 import { Input } from "@/components/ui/input";
@@ -34,6 +32,7 @@ type QueueItem = {
 export default function KanjiWriting() {
     const { kanjiData, isLoading } = useData();
     const [mode, setMode] = useState<WritingMode>("kanji-to-han");
+    const [showAll, setShowAll] = useState(false);
 
     const [queue, setQueue] = useState<QueueItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,12 +48,24 @@ export default function KanjiWriting() {
 
     // Initialize practice session
     const startPractice = useCallback(() => {
-        const unlearned = kanjiData.filter((k) => !k.isLearned);
+        const pool = showAll ? kanjiData : kanjiData.filter((k) => !k.isLearned);
+        console.log("[DEBUG] KanjiWriting Pool:", pool.length, "showAll:", showAll);
+        
+        // Reset states at the beginning
+        setScore(0);
+        setTotalAttempted(0);
+        setCurrentIndex(0);
+        setUserInput("");
+        setIsCorrect(null);
+        setPenaltyTimer(0);
+        setShowAnswer(false);
+        setFinished(false);
+
         let initialQueue: QueueItem[] = [];
 
         if (mode === "kanji-to-vocab") {
-            // Flatten all vocab from unlearned kanji
-            unlearned.forEach(k => {
+            // Flatten all vocab from pool
+            pool.forEach(k => {
                 if (k.vocab && k.vocab.length > 0) {
                     k.vocab.forEach(v => {
                         initialQueue.push({ kanji: k, vocab: v });
@@ -62,21 +73,16 @@ export default function KanjiWriting() {
                 }
             });
         } else {
-            initialQueue = unlearned.map(k => ({ kanji: k }));
+            initialQueue = pool.map(k => ({ kanji: k }));
         }
 
         const shuffled = initialQueue.sort(() => Math.random() - 0.5);
+        if (shuffled.length === 0) {
+            setFinished(true);
+        }
         setQueue(shuffled);
-        setCurrentIndex(0);
-        setUserInput("");
-        setIsCorrect(null);
-        setPenaltyTimer(0);
-        setShowAnswer(false);
-        setFinished(false);
-        setScore(0);
-        setTotalAttempted(0);
         setTimeout(() => inputRef.current?.focus(), 100);
-    }, [kanjiData, mode]);
+    }, [kanjiData, mode, showAll]);
 
     useEffect(() => {
         startPractice();
@@ -160,7 +166,6 @@ export default function KanjiWriting() {
                 inputRef.current.focus();
             }
         }, 600);
-
         return () => clearTimeout(timer);
     }, [currentIndex, finished, mode, penaltyTimer]);
 
@@ -184,17 +189,6 @@ export default function KanjiWriting() {
         setTimeout(() => inputRef.current?.focus(), 10);
     };
 
-    if (finished) {
-        return (
-            <PracticeFinished 
-                score={score} 
-                totalAttempted={totalAttempted} 
-                onRetry={startPractice} 
-                title="Hoàn thành tự luận Kanji!"
-            />
-        );
-    }
-
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full max-w-3xl mx-auto p-4 space-y-8">
@@ -204,13 +198,11 @@ export default function KanjiWriting() {
         );
     }
 
-    if (!currentKanji) return null;
-
     return (
         <div className="w-full max-w-3xl mx-auto p-4 space-y-8 py-10">
             <PracticeHeader 
                 icon={PenTool}
-                title="Tự luận Kanji"
+                title="Tự luận Kanji N3"
                 description={
                     mode === "kanji-to-han"
                         ? "Kanji → Âm Hán"
@@ -225,117 +217,129 @@ export default function KanjiWriting() {
                 }}
                 currentIndex={currentIndex}
                 total={queue.length}
+                showAll={showAll}
+                onShowAllChange={setShowAll}
             />
 
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={currentIndex + mode}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="space-y-8"
-                >
-                    <Card className="border-none shadow-2xl shadow-stone-200/50 bg-white rounded-[3rem] p-8 md:p-16 overflow-hidden">
-                        <CardContent className="p-0 flex flex-col items-center space-y-12">
-                            <div className="text-center space-y-4">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 Vietnamese-Content">
-                                    {mode === "kanji-to-han"
-                                        ? "Âm Hán Việt của chữ này là gì?"
-                                        : mode === "kanji-to-on"
-                                          ? "Âm ON của chữ này là gì?"
-                                          : "Cách đọc của từ vựng này là gì?"}
-                                </span>
-                                <h2 className="font-black text-stone-900 leading-tight text-7xl md:text-8xl font-kanji">
-                                    {mode === "kanji-to-vocab" ? currentKanji.vocab?.word : currentKanji.kanji.kanji}
-                                </h2>
-                                {mode === "kanji-to-vocab" && (
-                                    <div className="flex justify-center gap-2 mt-2">
-                                        <Badge variant="outline" className="bg-stone-50 text-stone-500 font-bold font-kanji border-stone-200">
-                                            Kanji: {currentKanji.kanji.kanji}
-                                        </Badge>
+            {finished ? (
+                <PracticeFinished 
+                    score={score} 
+                    totalAttempted={totalAttempted} 
+                    onRetry={startPractice} 
+                    onReviewAll={() => setShowAll(true)}
+                    title="Hoàn thành tự luận Kanji!"
+                />
+            ) : (
+                currentKanji && (
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentIndex + mode}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="space-y-8"
+                        >
+                            <Card className="border-none shadow-2xl shadow-stone-200/50 bg-white rounded-[3rem] p-8 md:p-16 overflow-hidden">
+                                <CardContent className="p-0 flex flex-col items-center space-y-12">
+                                    <div className="text-center space-y-4">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 Vietnamese-Content">
+                                            {mode === "kanji-to-han"
+                                                ? "Âm Hán Việt của chữ này là gì?"
+                                                : mode === "kanji-to-on"
+                                                  ? "Âm ON của chữ này là gì?"
+                                                  : "Cách đọc của từ vựng này là gì?"}
+                                        </span>
+                                        <h2 className="font-black text-stone-900 leading-tight text-7xl md:text-8xl font-kanji">
+                                            {mode === "kanji-to-vocab" ? currentKanji.vocab?.word : currentKanji.kanji.kanji}
+                                        </h2>
+                                        {mode === "kanji-to-vocab" && (
+                                            <div className="flex justify-center gap-2 mt-2">
+                                                <Badge variant="outline" className="bg-stone-50 text-stone-500 font-bold font-kanji border-stone-200">
+                                                    Kanji: {currentKanji.kanji.kanji}
+                                                </Badge>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
 
-                            <div className="w-full max-w-sm space-y-4">
-                                <form onSubmit={(e) => handleCheck(e as any)} className="relative">
-                                    <Input
-                                        ref={inputRef}
-                                        value={userInput}
-                                        onChange={(e) => handleInputChange(e.target.value)}
-                                        disabled={penaltyTimer > 0 || isCorrect === true}
-                                        placeholder={
-                                            mode === "kanji-to-han"
-                                                ? "Nhập âm Hán..."
-                                                : "Nhập cách đọc..."
-                                        }
-                                        className={cn(
-                                            "h-16 rounded-2xl text-center text-2xl font-bold border-2 transition-all duration-300",
-                                            isCorrect === true
-                                                ? "border-green-500 bg-green-50 text-green-700 Vietnamese-Content"
-                                                : isCorrect === false
-                                                  ? "border-red-500 bg-red-50 text-red-700 Vietnamese-Content"
-                                                  : "border-stone-100 focus:border-primary focus:ring-4 focus:ring-primary/10",
-                                        )}
-                                    />
-                                    <AnimatePresence>
-                                        {userInput.length > 0 && !isCorrect && penaltyTimer === 0 && (
-                                            <motion.button
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.8 }}
-                                                className="absolute right-2 top-2 h-12 w-12 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-                                                type="submit"
-                                            >
-                                                <ArrowRight size={20} />
-                                            </motion.button>
-                                        )}
-                                    </AnimatePresence>
-                                </form>
+                                    <div className="w-full max-w-sm space-y-4">
+                                        <form onSubmit={(e) => handleCheck(e as any)} className="relative">
+                                            <Input
+                                                ref={inputRef}
+                                                value={userInput}
+                                                onChange={(e) => handleInputChange(e.target.value)}
+                                                disabled={penaltyTimer > 0 || isCorrect === true}
+                                                placeholder={
+                                                    mode === "kanji-to-han"
+                                                        ? "Nhập âm Hán..."
+                                                        : "Nhập cách đọc..."
+                                                }
+                                                className={cn(
+                                                    "h-16 rounded-2xl text-center text-2xl font-bold border-2 transition-all duration-300",
+                                                    isCorrect === true
+                                                        ? "border-green-500 bg-green-50 text-green-700 Vietnamese-Content"
+                                                        : isCorrect === false
+                                                          ? "border-red-500 bg-red-50 text-red-700 Vietnamese-Content"
+                                                          : "border-stone-100 focus:border-primary focus:ring-4 focus:ring-primary/10",
+                                                )}
+                                            />
+                                            <AnimatePresence>
+                                                {userInput.length > 0 && !isCorrect && penaltyTimer === 0 && (
+                                                    <motion.button
+                                                        initial={{ opacity: 0, scale: 0.8 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        exit={{ opacity: 0, scale: 0.8 }}
+                                                        className="absolute right-2 top-2 h-12 w-12 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                                                        type="submit"
+                                                    >
+                                                        <ArrowRight size={20} />
+                                                    </motion.button>
+                                                )}
+                                            </AnimatePresence>
+                                        </form>
 
-                                <PracticeFeedback 
-                                    penaltyTimer={penaltyTimer}
-                                    showAnswer={showAnswer}
-                                    isCorrect={isCorrect}
-                                    correctAnswer={getCorrectAnswer()}
-                                    onRetry={handleRetryAfterPenalty}
-                                    extraContent={(isCorrect === true || showAnswer) && mode === "kanji-to-vocab" && (
-                                        <div className="bg-stone-50 rounded-2xl p-4 border border-stone-100 space-y-2 mt-2">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Nghĩa:</span>
-                                                <span className="text-sm font-bold text-primary Vietnamese-Content">{currentKanji.vocab?.meaning}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between border-t border-stone-100 pt-2">
-                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Âm Hán:</span>
-                                                <span className="text-sm font-bold text-stone-700 font-kanji">{currentKanji.kanji.han}</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
+                                        <PracticeFeedback 
+                                            penaltyTimer={penaltyTimer}
+                                            showAnswer={showAnswer}
+                                            isCorrect={isCorrect}
+                                            correctAnswer={getCorrectAnswer()}
+                                            onRetry={handleRetryAfterPenalty}
+                                            extraContent={(isCorrect === true || showAnswer) && mode === "kanji-to-vocab" && (
+                                                <div className="bg-stone-50 rounded-2xl p-4 border border-stone-100 space-y-2 mt-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Nghĩa:</span>
+                                                        <span className="text-sm font-bold text-primary Vietnamese-Content">{currentKanji.vocab?.meaning}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between border-t border-stone-100 pt-2">
+                                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Âm Hán:</span>
+                                                        <span className="text-sm font-bold text-stone-700 font-kanji">{currentKanji.kanji.han}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="bg-primary/5 rounded-2xl p-6 border border-primary/10 flex items-start gap-4"
-                    >
-                        <Sparkles className="text-primary shrink-0 mt-1" size={20} />
-                        <div className="space-y-1">
-                            <h4 className="font-bold text-stone-800 Vietnamese-Content text-sm">Gợi ý luyện tập</h4>
-                            <p className="text-stone-500 text-xs leading-relaxed Vietnamese-Content">
-                                {mode === "kanji-to-han"
-                                    ? "Nhập âm Hán Việt không dấu hoặc có dấu (hệ thống sẽ chuẩn hóa). Chú ý các chữ có nhiều âm đọc."
-                                    : "Sử dụng bàn phím Tiếng Nhật để gõ Hiragana chính xác."}
-                            </p>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            </AnimatePresence>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="bg-primary/5 rounded-2xl p-6 border border-primary/10 flex items-start gap-4"
+                            >
+                                <Sparkles className="text-primary shrink-0 mt-1" size={20} />
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-stone-800 Vietnamese-Content text-sm">Gợi ý luyện tập</h4>
+                                    <p className="text-stone-500 text-xs leading-relaxed Vietnamese-Content">
+                                        {mode === "kanji-to-han"
+                                            ? "Nhập âm Hán Việt không dấu hoặc có dấu (hệ thống sẽ chuẩn hóa). Chú ý các chữ có nhiều âm đọc."
+                                            : "Sử dụng bàn phím Tiếng Nhật để gõ Hiragana chính xác."}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    </AnimatePresence>
+                )
+            )}
         </div>
     );
 }
-
-

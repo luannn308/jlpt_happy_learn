@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import FuriganaText from "@/components/common/FuriganaText";
 
 interface FlashcardProps {
     data: VocabularyItem | KanjiData;
@@ -160,13 +161,17 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                             {isVocab(data) ? (
                                 <>
                                     <div className="flex items-start gap-2 mt-1">
-                                        <p className="flex-1 text-lg font-bold text-stone-700 leading-relaxed font-kanji">
-                                            {data.example}
-                                        </p>
+                                        <div className="flex-1">
+                                            <FuriganaText 
+                                                text={data.example} 
+                                                className="text-lg font-bold text-stone-700 leading-relaxed"
+                                                furiganaClassName="text-xs"
+                                            />
+                                        </div>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full hover:bg-primary/10 text-stone-300 hover:text-primary"
+                                            className="h-8 w-8 rounded-full hover:bg-primary/10 text-stone-300 hover:text-primary shrink-0"
                                             onClick={(e) => handleSpeak(data.example, e)}
                                         ></Button>
                                     </div>
