@@ -18,19 +18,24 @@ import PracticeFinished from "@/components/quiz/shared/PracticeFinished";
 import PracticeHeader from "@/components/quiz/shared/PracticeHeader";
 import PracticeFeedback from "@/components/quiz/shared/PracticeFeedback";
 
-type WritingMode = "kanji-to-han" | "kanji-to-on" | "kanji-to-kun";
+type WritingMode = "kanji-to-han" | "kanji-to-on" | "kanji-to-vocab";
 
 const WRITING_MODES = [
     { id: "kanji-to-han", label: "Âm Hán" },
     { id: "kanji-to-on", label: "Onyomi" },
-    { id: "kanji-to-kun", label: "Kunyomi" },
+    { id: "kanji-to-vocab", label: "Từ vựng" },
 ];
+
+type QueueItem = {
+    kanji: KanjiData;
+    vocab?: KanjiData["vocab"][0];
+};
 
 export default function KanjiWriting() {
     const { kanjiData, isLoading } = useData();
     const [mode, setMode] = useState<WritingMode>("kanji-to-han");
 
-    const [queue, setQueue] = useState<KanjiData[]>([]);
+    const [queue, setQueue] = useState<QueueItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [userInput, setUserInput] = useState("");
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -44,7 +49,23 @@ export default function KanjiWriting() {
 
     // Initialize practice session
     const startPractice = useCallback(() => {
-        const shuffled = [...kanjiData.filter((k) => !k.isLearned)].sort(() => Math.random() - 0.5);
+        const unlearned = kanjiData.filter((k) => !k.isLearned);
+        let initialQueue: QueueItem[] = [];
+
+        if (mode === "kanji-to-vocab") {
+            // Flatten all vocab from unlearned kanji
+            unlearned.forEach(k => {
+                if (k.vocab && k.vocab.length > 0) {
+                    k.vocab.forEach(v => {
+                        initialQueue.push({ kanji: k, vocab: v });
+                    });
+                }
+            });
+        } else {
+            initialQueue = unlearned.map(k => ({ kanji: k }));
+        }
+
+        const shuffled = initialQueue.sort(() => Math.random() - 0.5);
         setQueue(shuffled);
         setCurrentIndex(0);
         setUserInput("");
@@ -55,7 +76,7 @@ export default function KanjiWriting() {
         setScore(0);
         setTotalAttempted(0);
         setTimeout(() => inputRef.current?.focus(), 100);
-    }, [kanjiData]);
+    }, [kanjiData, mode]);
 
     useEffect(() => {
         startPractice();
@@ -75,9 +96,9 @@ export default function KanjiWriting() {
 
     const getCorrectAnswer = () => {
         if (!currentKanji) return "";
-        if (mode === "kanji-to-han") return currentKanji.han;
-        if (mode === "kanji-to-on") return currentKanji.on;
-        return currentKanji.kun;
+        if (mode === "kanji-to-han") return currentKanji.kanji.han;
+        if (mode === "kanji-to-on") return currentKanji.kanji.on;
+        return currentKanji.vocab?.reading || "";
     };
 
     const katakanaToHiragana = (src: string) => {
@@ -93,7 +114,7 @@ export default function KanjiWriting() {
     };
 
     const handleInputChange = (val: string) => {
-        if (mode === "kanji-to-on" || mode === "kanji-to-kun") {
+        if (mode === "kanji-to-on" || mode === "kanji-to-vocab") {
             setUserInput(toHiragana(val));
         } else {
             setUserInput(val);
@@ -195,13 +216,12 @@ export default function KanjiWriting() {
                         ? "Kanji → Âm Hán"
                         : mode === "kanji-to-on"
                             ? "Kanji → Onyomi" 
-                            : "Kanji → Kunyomi"
+                            : "Kanji → Từ vựng liên quan"
                 }
                 modes={WRITING_MODES}
                 activeMode={mode}
                 onModeChange={(newMode) => {
-                    setMode(newMode);
-                    startPractice();
+                    setMode(newMode as WritingMode);
                 }}
                 currentIndex={currentIndex}
                 total={queue.length}
@@ -223,11 +243,18 @@ export default function KanjiWriting() {
                                         ? "Âm Hán Việt của chữ này là gì?"
                                         : mode === "kanji-to-on"
                                           ? "Âm ON của chữ này là gì?"
-                                          : "Âm KUN của chữ này là gì?"}
+                                          : "Cách đọc của từ vựng này là gì?"}
                                 </span>
-                                <h2 className="font-black text-stone-900 leading-tight text-8xl md:text-9xl font-kanji">
-                                    {currentKanji.kanji}
+                                <h2 className="font-black text-stone-900 leading-tight text-7xl md:text-8xl font-kanji">
+                                    {mode === "kanji-to-vocab" ? currentKanji.vocab?.word : currentKanji.kanji.kanji}
                                 </h2>
+                                {mode === "kanji-to-vocab" && (
+                                    <div className="flex justify-center gap-2 mt-2">
+                                        <Badge variant="outline" className="bg-stone-50 text-stone-500 font-bold font-kanji border-stone-200">
+                                            Kanji: {currentKanji.kanji.kanji}
+                                        </Badge>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="w-full max-w-sm space-y-4">
@@ -272,6 +299,18 @@ export default function KanjiWriting() {
                                     isCorrect={isCorrect}
                                     correctAnswer={getCorrectAnswer()}
                                     onRetry={handleRetryAfterPenalty}
+                                    extraContent={(isCorrect === true || showAnswer) && mode === "kanji-to-vocab" && (
+                                        <div className="bg-stone-50 rounded-2xl p-4 border border-stone-100 space-y-2 mt-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Nghĩa:</span>
+                                                <span className="text-sm font-bold text-primary Vietnamese-Content">{currentKanji.vocab?.meaning}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between border-t border-stone-100 pt-2">
+                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Âm Hán:</span>
+                                                <span className="text-sm font-bold text-stone-700 font-kanji">{currentKanji.kanji.han}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 />
                             </div>
                         </CardContent>

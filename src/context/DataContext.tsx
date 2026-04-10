@@ -12,6 +12,7 @@ interface DataContextType {
   error: string | null;
   refreshData: () => Promise<void>;
   updateLearnedStatus: (type: "kanji" | "vocab", id: number, status: boolean) => Promise<boolean>;
+  bulkUpdateLearnedStatus: (type: "kanji" | "vocab", ids: number[], status: boolean) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -68,6 +69,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const bulkUpdateLearnedStatus = useCallback(async (type: "kanji" | "vocab", ids: number[], status: boolean) => {
+    // 1. Cập nhật state local ngay lập tức
+    if (type === "kanji") {
+      setKanjiData(prev => prev.map(item => ids.includes(item.id) ? { ...item, isLearned: status } : item));
+    } else {
+      setVocabularyData(prev => prev.map(item => ids.includes(item.id) ? { ...item, isLearned: status } : item));
+    }
+
+    // 2. Gọi API để cập nhật lên Sheets cho từng item (Vì API chưa hỗ trợ bulk)
+    // Sử dụng Promise.all để chạy song song cho nhanh hơn nhưng vẫn đảm bảo tất cả được gọi
+    try {
+      await Promise.all(ids.map(id => 
+        fetch('/api/data/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id, type, isLearned: status }),
+        })
+      ));
+      console.log(`Đã cập nhật hàng loạt ${ids.length} ${type} lên Google Sheets`);
+    } catch (err) {
+      console.error("Lỗi đồng bộ hàng loạt Google Sheets:", err);
+    }
+  }, []);
+
   useEffect(() => {
     refreshData();
   }, [refreshData]);
@@ -81,6 +108,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         error,
         refreshData,
         updateLearnedStatus,
+        bulkUpdateLearnedStatus,
       }}
     >
       {children}

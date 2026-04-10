@@ -15,9 +15,10 @@ import KanjiGrid from "@/components/kanji/KanjiGrid";
 import KanjiDetail from "@/components/kanji/KanjiDetail";
 import VocabGrid from "@/components/kanji/VocabGrid";
 import VocabDetail from "@/components/kanji/VocabDetail";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 export default function Home() {
-    const { kanjiData, vocabularyData, isLoading, updateLearnedStatus } = useData();
+    const { kanjiData, vocabularyData, isLoading, updateLearnedStatus, bulkUpdateLearnedStatus } = useData();
     const [activeTab, setActiveTab] = useState<string>("kanji");
 
     // Kanji States
@@ -29,6 +30,7 @@ export default function Home() {
     const [learnedVocab, setLearnedVocab] = useState<Set<number>>(new Set());
 
     const [masks, setMasks] = useState({ reading: false, meaning: false });
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // Load all learned data from localStorage
     useEffect(() => {
@@ -117,6 +119,48 @@ export default function Home() {
             await updateLearnedStatus("vocab", vocabIndex, newStatus);
         }
     }, [currentIndex, vocabIndex, activeTab, learned, learnedVocab, updateLearnedStatus]);
+
+    const handleMarkAllAsLearned = useCallback(() => {
+        setShowConfirmModal(true);
+    }, []);
+
+    const confirmMarkAllAsLearned = useCallback(async () => {
+        if (activeTab === "kanji") {
+            const unlearnedKanjiIds = kanjiData
+                .filter((k) => !k.isLearned)
+                .map((k) => k.id);
+            
+            if (unlearnedKanjiIds.length === 0) return;
+
+            // 1. Cập nhật local state (Set)
+            setLearned((prev) => {
+                const next = new Set(prev);
+                unlearnedKanjiIds.forEach(id => next.add(id));
+                return next;
+            });
+
+            // 2. Cập nhật trong Context & Backend
+            await bulkUpdateLearnedStatus("kanji", unlearnedKanjiIds, true);
+            setCurrentIndex(null); // Reset detail view
+        } else {
+            const unlearnedVocabIds = vocabularyData
+                .filter((v) => !v.isLearned)
+                .map((v) => v.id);
+
+            if (unlearnedVocabIds.length === 0) return;
+
+            // 1. Cập nhật local state (Set)
+            setLearnedVocab((prev) => {
+                const next = new Set(prev);
+                unlearnedVocabIds.forEach(id => next.add(id));
+                return next;
+            });
+
+            // 2. Cập nhật trong Context & Backend
+            await bulkUpdateLearnedStatus("vocab", unlearnedVocabIds, true);
+            setVocabIndex(null); // Reset detail view
+        }
+    }, [activeTab, kanjiData, vocabularyData, bulkUpdateLearnedStatus]);
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
@@ -235,6 +279,7 @@ export default function Home() {
                                 currentIndex={currentIndex}
                                 learned={learned}
                                 onSelect={selectKanji}
+                                onMarkAllAsLearned={handleMarkAllAsLearned}
                             />
                         </div>
                     </TabsContent>
@@ -246,6 +291,7 @@ export default function Home() {
                                 currentIndex={vocabIndex}
                                 learned={learnedVocab}
                                 onSelect={selectVocab}
+                                onMarkAllAsLearned={handleMarkAllAsLearned}
                             />
                         </div>
                     </TabsContent>
@@ -341,6 +387,19 @@ export default function Home() {
             </main>
 
             <Footer />
+
+            <ConfirmationModal
+                isOpen={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={confirmMarkAllAsLearned}
+                title="Xác nhận học tất cả"
+                description={`Bạn có chắc chắn muốn đánh dấu tất cả ${
+                    activeTab === "kanji" ? "chữ Kanji" : "từ vựng"
+                } hiện tại là đã học không? Hành động này không thể hoàn tác nhanh.`}
+                confirmText="Xác nhận học hết"
+                cancelText="Để tôi xem lại"
+                variant="primary"
+            />
         </div>
     );
 }

@@ -2,8 +2,10 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Bookmark } from "lucide-react";
+import { CheckCircle2, ListChecks } from "lucide-react";
 import { VocabularyItem } from "@/data/vocabulary";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface VocabGridProps {
@@ -11,11 +13,32 @@ interface VocabGridProps {
     currentIndex: number | null;
     learned: Set<number>;
     onSelect: (id: number) => void;
+    onMarkAllAsLearned?: () => void;
 }
 
-export default function VocabGrid({ data, currentIndex, learned, onSelect }: VocabGridProps) {
+export default function VocabGrid({ data, currentIndex, learned, onSelect, onMarkAllAsLearned }: VocabGridProps) {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+        <section className="mb-10">
+            <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500">Danh sách từ vựng mới</h3>
+                    {onMarkAllAsLearned && data.length > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onMarkAllAsLearned}
+                            className="h-8 rounded-xl text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all gap-1.5"
+                        >
+                            <ListChecks className="h-3.5 w-3.5" />
+                            Học tất cả
+                        </Button>
+                    )}
+                </div>
+                <Badge variant="secondary" className="font-mono text-[10px]">
+                    {learned.size} / {data.length} Đã học
+                </Badge>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
             {data.map((item, idx) => {
                 const isActive = currentIndex === item.id;
                 const isLearned = learned.has(item.id);
@@ -73,7 +96,7 @@ export default function VocabGrid({ data, currentIndex, learned, onSelect }: Voc
                     </motion.div>
                 );
             })}
-        </div>
+            </div>
+        </section>
     );
 }
-

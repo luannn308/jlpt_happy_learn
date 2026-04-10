@@ -2,9 +2,11 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, ListChecks } from "lucide-react";
 import { KanjiData } from "@/data/kanji";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface KanjiGridProps {
@@ -12,13 +14,27 @@ interface KanjiGridProps {
     currentIndex: number | null;
     learned: Set<number>;
     onSelect: (id: number) => void;
+    onMarkAllAsLearned?: () => void;
 }
 
-export default function KanjiGrid({ data, currentIndex, learned, onSelect }: KanjiGridProps) {
+export default function KanjiGrid({ data, currentIndex, learned, onSelect, onMarkAllAsLearned }: KanjiGridProps) {
     return (
         <section className="mb-10">
             <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500">Danh sách 10 chữ mới</h3>
+                <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500">Danh sách 10 chữ mới</h3>
+                    {onMarkAllAsLearned && data.length > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onMarkAllAsLearned}
+                            className="h-8 rounded-xl text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all gap-1.5"
+                        >
+                            <ListChecks className="h-3.5 w-3.5" />
+                            Học tất cả
+                        </Button>
+                    )}
+                </div>
                 <Badge variant="secondary" className="font-mono text-[10px]">
                     {learned.size} / {data.length} Đã học
                 </Badge>
