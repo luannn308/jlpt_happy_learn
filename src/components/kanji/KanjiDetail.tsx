@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import FuriganaText from "@/components/common/FuriganaText";
+import SpeakButton from "@/components/common/SpeakButton";
 
 interface KanjiDetailProps {
     data: KanjiData;
@@ -58,9 +60,7 @@ export default function KanjiDetail({
                                 {data.han}
                             </h2>
                             {data.meaning && (
-                                <p className="mt-1 text-sm font-medium text-stone-500 italic">
-                                    ({data.meaning})
-                                </p>
+                                <p className="mt-1 text-sm font-medium text-stone-500 italic">({data.meaning})</p>
                             )}
 
                             <div className="mt-8 flex w-full flex-col gap-3">
@@ -157,9 +157,14 @@ export default function KanjiDetail({
                                             >
                                                 <CardContent className="p-4">
                                                     <div className="flex items-baseline justify-between border-b border-stone-50 pb-2 mb-2">
-                                                        <span className="font-kanji text-2xl font-bold text-primary group-hover:scale-110 transition-transform origin-left duration-300">
-                                                            {v.word}
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            <FuriganaText
+                                                                text={v.word}
+                                                                className="font-kanji text-2xl font-bold text-primary group-hover:scale-110 transition-transform origin-left duration-300 has-ruby"
+                                                                furiganaClassName="text-[0.4em]"
+                                                            />
+                                                            <SpeakButton text={v.word} size="sm" />
+                                                        </div>
                                                         <span
                                                             className={cn(
                                                                 "text-xs font-bold text-stone-400 cursor-help transition-all duration-300",
@@ -201,8 +206,8 @@ export default function KanjiDetail({
                         </Button>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300 pt-1">
-                                KANJI {currentIndex + 1} OF {total}
+                            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wider md:tracking-[0.3em] text-stone-300 pt-1 tabular-nums whitespace-nowrap">
+                                KANJI {currentIndex + 1} / {total}
                             </span>
                         </div>
 

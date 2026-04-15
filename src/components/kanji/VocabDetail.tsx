@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import FuriganaText from "@/components/common/FuriganaText";
+import SpeakButton from "@/components/common/SpeakButton";
+import { playJapaneseAudio } from "@/lib/audio";
 
 interface VocabDetailProps {
     data: VocabularyItem;
@@ -55,10 +57,14 @@ export default function VocabDetail({
                                 {data.category || "Từ vựng"}
                             </Badge>
 
-                            <div className="relative mb-2">
+                            <div
+                                className="relative mb-2 cursor-pointer group"
+                                onClick={() => playJapaneseAudio(data.word)}
+                                title="Bấm để nghe phát âm"
+                            >
                                 <span
                                     className={cn(
-                                        "font-kanji text-7xl font-black leading-tight text-stone-900 transition-all duration-300",
+                                        "font-kanji text-7xl font-black leading-tight text-stone-900 transition-all duration-300 group-hover:text-primary",
                                     )}
                                 >
                                     {data.word}
@@ -125,17 +131,20 @@ export default function VocabDetail({
                                 </section>
 
                                 <section className="space-y-4">
-                                    <div className="flex items-center gap-2 text-primary">
-                                        <Quote size={24} className="fill-primary/10" />
-                                        <span className="text-xs font-black uppercase tracking-widest">
-                                            Câu ví dụ (例文)
-                                        </span>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2 text-primary">
+                                            <Quote size={24} className="fill-primary/10" />
+                                            <span className="text-xs font-black uppercase tracking-widest">
+                                                Câu ví dụ (例文)
+                                            </span>
+                                        </div>
+                                        <SpeakButton text={data.example} variant="outline" size="sm" />
                                     </div>
                                     <Card className="border-stone-100 bg-white shadow-sm rounded-[2rem] overflow-hidden border-2">
                                         <CardContent className="p-8 space-y-6">
-                                            <FuriganaText 
-                                                text={data.example} 
-                                                className="text-2xl md:text-3xl font-bold leading-relaxed text-stone-800"
+                                            <FuriganaText
+                                                text={data.example}
+                                                className="text-2xl md:text-3xl font-bold leading-relaxed text-stone-800 has-ruby"
                                                 furiganaClassName="text-sm"
                                             />
                                             <Separator className="bg-stone-50" />
@@ -160,8 +169,9 @@ export default function VocabDetail({
                         </Button>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300 pt-1">
-                                VOCABULARY {currentIndex + 1} OF {total}
+                            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wider md:tracking-[0.3em] text-stone-300 pt-1 tabular-nums whitespace-nowrap">
+                                <span className="hidden xs:inline">VOCABULARY</span>
+                                <span className="xs:hidden">VOCAB</span> {currentIndex + 1} / {total}
                             </span>
                         </div>
 

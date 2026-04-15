@@ -16,6 +16,8 @@ import PracticeFinished from "@/components/quiz/shared/PracticeFinished";
 import PracticeHeader from "@/components/quiz/shared/PracticeHeader";
 import PracticeFeedback from "@/components/quiz/shared/PracticeFeedback";
 import FuriganaText from "@/components/common/FuriganaText";
+import { playJapaneseAudio } from "@/lib/audio";
+import SpeakButton from "@/components/common/SpeakButton";
 
 type VocabMode = "word-to-reading" | "meaning-to-word" | "word-to-meaning";
 
@@ -120,6 +122,9 @@ export default function VocabWriting() {
             setScore((prev) => prev + 1);
             setTotalAttempted((prev) => prev + 1);
 
+            // Đọc từ vựng khi nhập đúng
+            playJapaneseAudio(currentVocab.word);
+
             setTimeout(() => {
                 handleNext();
             }, 1000);
@@ -179,7 +184,7 @@ export default function VocabWriting() {
     return (
         <div className="w-full space-y-8">
             <PracticeHeader 
-                icon={BookOpen}
+                icon={<BookOpen size={14} />}
                 title="Tự luận Từ vựng N3"
                 description={
                     mode === "word-to-reading" 
@@ -271,11 +276,14 @@ export default function VocabWriting() {
                                                 <div className="space-y-4 text-left">
                                                     <p className="text-2xl font-black text-stone-900 font-kanji text-center">{currentVocab.word}</p>
                                                     <div className="pt-4 border-t border-stone-200">
-                                                        <FuriganaText 
-                                                            text={currentVocab.example || ""} 
-                                                            className="text-base font-bold text-stone-700 leading-relaxed Vietnamese-Content"
-                                                            furiganaClassName="text-xs"
-                                                        />
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <FuriganaText 
+                                                                text={currentVocab.example || ""} 
+                                                                className="text-base font-bold text-stone-700 leading-relaxed Vietnamese-Content has-ruby"
+                                                                furiganaClassName="text-xs"
+                                                            />
+                                                            <SpeakButton text={currentVocab.example || ""} size="sm" variant="outline" />
+                                                        </div>
                                                         <p className="text-xs text-stone-400 mt-1 Vietnamese-Content italic">"{currentVocab.exampleMeaning}"</p>
                                                     </div>
                                                 </div>

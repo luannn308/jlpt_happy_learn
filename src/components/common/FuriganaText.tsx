@@ -24,28 +24,28 @@ export default function FuriganaText({
 }: FuriganaTextProps) {
     const { furigana, isLoading } = useFurigana(text);
 
-    return (
-        <div className={cn("flex flex-col", className)}>
-            <span className="font-kanji">
+    if (isLoading && !showOriginalIfLoading) {
+        return <div className="h-[1em] w-20 bg-stone-100 animate-pulse rounded mt-1" />;
+    }
+
+    // Nếu đang tải và muốn hiện text gốc, hoặc nếu không có furigana (lỗi), hiện text gốc
+    if (isLoading || !furigana) {
+        return (
+            <span className={cn("font-kanji", className)}>
                 {text}
             </span>
-            <AnimatePresence>
-                {!isLoading && furigana && furigana !== text && (
-                    <motion.span
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={cn(
-                            "text-[0.6em] font-medium text-stone-400 font-kanji leading-tight mt-0.5",
-                            furiganaClassName
-                        )}
-                    >
-                        {furigana}
-                    </motion.span>
-                )}
-            </AnimatePresence>
-            {isLoading && !showOriginalIfLoading && (
-                <div className="h-[1em] w-20 bg-stone-100 animate-pulse rounded mt-1" />
+        );
+    }
+
+    return (
+        <span 
+            className={cn(
+                "font-kanji inline-ruby", 
+                className,
+                // Định dạng cho các thẻ rt bên trong
+                "[&_rt]:text-[0.5em] [&_rt]:text-stone-400 [&_rt]:font-medium [&_rt]:tracking-normal"
             )}
-        </div>
+            dangerouslySetInnerHTML={{ __html: furigana }}
+        />
     );
 }

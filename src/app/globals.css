@@ -181,3 +181,44 @@
     font-family: "Be Vietnam Pro", sans-serif;
 }
 
+/* Premium Utilities */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Tab Fade Effect */
+.tab-mask {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
+}
+/* Ruby & Furigana Styles */
+ruby {
+    ruby-position: over;
+    -webkit-ruby-position: over;
+    ruby-align: center;
+}
+
+rt {
+    font-family: inherit;
+    font-size: 0.55em;
+    color: var(--text-muted);
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 0.1em;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Tăng khoảng cách dòng cho các đoạn văn có chứa ruby */
+.has-ruby {
+    line-height: 2.2;
+}
+
+.inline-ruby {
+    display: inline-ruby;
+}

@@ -8,19 +8,17 @@ import VocabWriting from "@/components/quiz/VocabWriting";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PenTool, BookOpen } from "lucide-react";
+import BackButton from "@/components/common/BackButton";
 
 export default function WritingPage() {
     const [activeTab, setActiveTab] = useState("kanji");
 
     return (
         <div className="min-h-screen bg-[#faf9f6] font-sans text-stone-900">
-            <Header
-                learnedCount={0}
-                totalCount={0}
-                level="JLPT N3 Writing Practice"
-            />
+            <Header learnedCount={0} totalCount={0} level="JLPT N3 Writing Practice" />
 
             <main className="container mx-auto px-4 max-w-7xl mt-24 mb-20 text-center">
+                <BackButton className="text-left" />
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -32,7 +30,7 @@ export default function WritingPage() {
                             {activeTab === "kanji" ? "Tự luận Kanji" : "Tự luận Từ vựng"}
                         </h1>
                         <p className="text-stone-500 font-medium Vietnamese-Content">
-                            {activeTab === "kanji" 
+                            {activeTab === "kanji"
                                 ? "Luyện tập ghi nhớ sâu qua việc nhập liệu chính xác"
                                 : "Nâng cao phản xạ từ vựng và cách đọc Hiragana"}
                         </p>
@@ -41,21 +39,21 @@ export default function WritingPage() {
                     <Tabs defaultValue="kanji" className="w-full" onValueChange={setActiveTab}>
                         <div className="flex justify-center mb-8">
                             <TabsList className="bg-stone-100 p-1 h-14 rounded-2xl shadow-inner border border-stone-200">
-                                <TabsTrigger 
-                                    value="kanji" 
+                                <TabsTrigger
+                                    value="kanji"
                                     className="rounded-xl px-8 h-12 font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm flex gap-2"
                                 >
                                     <PenTool size={18} /> Kanji
                                 </TabsTrigger>
-                                <TabsTrigger 
-                                    value="vocab" 
+                                <TabsTrigger
+                                    value="vocab"
                                     className="rounded-xl px-8 h-12 font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm flex gap-2"
                                 >
                                     <BookOpen size={18} /> Từ vựng
                                 </TabsTrigger>
                             </TabsList>
                         </div>
-                        
+
                         <TabsContent value="kanji" className="mt-0">
                             <KanjiWriting />
                         </TabsContent>
@@ -70,3 +68,4 @@ export default function WritingPage() {
         </div>
     );
 }
+

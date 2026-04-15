@@ -74,7 +74,7 @@ export async function getFurigana(text: string): Promise<string> {
     if (!text) return "";
 
     // 1. Kiểm tra cache
-    const cacheKey = `furigana_${text}`;
+    const cacheKey = `furigana_html_${text}`;
     if (typeof window !== 'undefined') {
         const cached = localStorage.getItem(cacheKey);
         if (cached) return cached;
@@ -87,7 +87,7 @@ export async function getFurigana(text: string): Promise<string> {
 
         const result = await kuroshiro.convert(text, {
             to: "hiragana",
-            mode: "normal"
+            mode: "furigana"
         });
 
         // 3. Lưu vào cache

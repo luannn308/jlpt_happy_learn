@@ -114,8 +114,10 @@ export default function KanjiWriting() {
     };
 
     const normalize = (str: string) => {
+        if (!str) return "";
         let normalized = str.trim().toLowerCase().normalize("NFC");
-        normalized = normalized.replace(/・/g, "");
+        // Loại bỏ dấu chấm okurigana (・) trong Kunyomi khi so sánh
+        normalized = normalized.replace(/\u30fb/g, ""); 
         return katakanaToHiragana(normalized);
     };
 
@@ -131,11 +133,23 @@ export default function KanjiWriting() {
         if (e) e.preventDefault();
         if (penaltyTimer > 0 || !currentKanji) return;
 
-        const correctAnswer = getCorrectAnswer();
+        const rawCorrectAnswer = getCorrectAnswer();
         const userInputNormalized = normalize(userInput);
 
-        const correctAnswers = correctAnswer.split(",").map((a) => normalize(a));
-        const isMatch = correctAnswers.some((a) => a === userInputNormalized);
+        // Tách đáp án bằng Regex: dấu phẩy (,), dấu phẩy Nhật (、), dấu chấm giữa (・), hoặc dấu gạch đứng (|)
+        const correctAnswers = rawCorrectAnswer
+            .split(/[,\u3001\u30fb|]/)
+            .map((a) => normalize(a))
+            .filter((a) => a.length > 0);
+
+        // Tách cả input của người dùng nếu họ nhập nhiều âm cùng lúc (như "kyou, kei")
+        const userAnswers = userInputNormalized
+            .split(/[,\u3001\u30fb|]/)
+            .map((a) => a.trim())
+            .filter((a) => a.length > 0);
+
+        // Kiểm tra: Mọi âm người dùng nhập phải nằm trong danh sách đáp án đúng
+        const isMatch = userAnswers.length > 0 && userAnswers.every((a) => correctAnswers.includes(a));
 
         if (isMatch) {
             setIsCorrect(true);
@@ -201,7 +215,7 @@ export default function KanjiWriting() {
     return (
         <div className="w-full max-w-3xl mx-auto p-4 space-y-8 py-10">
             <PracticeHeader 
-                icon={PenTool}
+                icon={<PenTool size={14} />}
                 title="Tự luận Kanji N3"
                 description={
                     mode === "kanji-to-han"

@@ -7,9 +7,8 @@ import FlashcardGame from "@/components/flashcards/FlashcardGame";
 import { useData } from "@/context/DataContext";
 
 import { motion } from "framer-motion";
-import { Sparkles, ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import BackButton from "@/components/common/BackButton";
 
 export default function FlashcardsPage() {
     const { kanjiData, vocabularyData, isLoading } = useData();
@@ -24,14 +23,7 @@ export default function FlashcardsPage() {
 
 
             <main className="container mx-auto px-4 max-w-7xl mt-20 relative">
-                {/* Back Button */}
-                <div className="mb-8">
-                    <Link href="/">
-                        <Button variant="ghost" className="rounded-xl font-bold text-stone-500 hover:text-primary hover:bg-white flex items-center gap-2">
-                            <ArrowLeft size={18} /> Quay lại trang chủ
-                        </Button>
-                    </Link>
-                </div>
+                <BackButton />
 
                 {/* Hero Section */}
                 <div className="flex flex-col items-center text-center mb-12 space-y-4">

@@ -9,10 +9,36 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, RotateCcw, Home, CheckCircle2, XCircle, BrainCircuit, Volume2, VolumeX } from "lucide-react";
+import {
+    Sparkles,
+    ArrowRight,
+    RotateCcw,
+    Home,
+    CheckCircle2,
+    XCircle,
+    BrainCircuit,
+    Volume2,
+    VolumeX,
+} from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuizQuestionDisplay } from "./shared/QuizQuestionDisplay";
+import { QuizOptionsGrid } from "./shared/QuizOptionsGrid";
+import PracticeHeader from "./shared/PracticeHeader";
+import { playJapaneseAudio } from "@/lib/audio";
+
+const VOCAB_MODES = [
+    { id: "all", label: "Tất cả" },
+    { id: "meaning", label: "Nghĩa" },
+    { id: "reading", label: "Cách đọc" },
+];
+
+const VOCAB_QUESTION_LABELS: Record<string, string> = {
+    "word-to-meaning": "Ý nghĩa của từ này là gì?",
+    "meaning-to-word": "Từ vựng nào có nghĩa là:",
+    "word-to-reading": "Cách đọc của từ này là gì?",
+};
 
 type VocabQuestionType = "word-to-meaning" | "meaning-to-word" | "word-to-reading";
 type VocabQuizMode = "all" | "meaning" | "reading";
@@ -23,8 +49,9 @@ interface VocabQuestion {
     questionText: string;
     correctAnswer: string;
     options: string[];
-    reading?: string; // Thêm cách đọc
-    han?: string;     // Thêm âm Hán
+    word: string; // Lưu từ vựng gốc để phát âm
+    reading?: string; 
+    han?: string; 
 }
 
 export default function VocabQuiz() {
@@ -104,48 +131,52 @@ export default function VocabQuiz() {
         localStorage.setItem("jlpt_quiz_muted", String(newState));
     };
 
-    const generateQuestion = useCallback((vocab: VocabularyItem, type: VocabQuestionType): VocabQuestion => {
-        let questionText = "";
-        let correctAnswer = "";
-        let options: string[] = [];
+    const generateQuestion = useCallback(
+        (vocab: VocabularyItem, type: VocabQuestionType): VocabQuestion => {
+            let questionText = "";
+            let correctAnswer = "";
+            let options: string[] = [];
 
-        // Helper to find random distractors
-        const getDistractors = (field: keyof VocabularyItem, count: number) => {
-            return vocabularyData
-                .filter((v) => v.id !== vocab.id)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, count)
-                .map((v) => v[field] as string);
-        };
+            // Helper to find random distractors
+            const getDistractors = (field: keyof VocabularyItem, count: number) => {
+                return vocabularyData
+                    .filter((v) => v.id !== vocab.id)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, count)
+                    .map((v) => v[field] as string);
+            };
 
-        switch (type) {
-            case "word-to-meaning":
-                questionText = vocab.word;
-                correctAnswer = vocab.meaning;
-                options = [correctAnswer, ...getDistractors("meaning", 3)];
-                break;
-            case "meaning-to-word":
-                questionText = vocab.meaning;
-                correctAnswer = vocab.word;
-                options = [correctAnswer, ...getDistractors("word", 3)];
-                break;
-            case "word-to-reading":
-                questionText = vocab.word;
-                correctAnswer = vocab.reading;
-                options = [correctAnswer, ...getDistractors("reading", 3)];
-                break;
-        }
+            switch (type) {
+                case "word-to-meaning":
+                    questionText = vocab.word;
+                    correctAnswer = vocab.meaning;
+                    options = [correctAnswer, ...getDistractors("meaning", 3)];
+                    break;
+                case "meaning-to-word":
+                    questionText = vocab.meaning;
+                    correctAnswer = vocab.word;
+                    options = [correctAnswer, ...getDistractors("word", 3)];
+                    break;
+                case "word-to-reading":
+                    questionText = vocab.word;
+                    correctAnswer = vocab.reading;
+                    options = [correctAnswer, ...getDistractors("reading", 3)];
+                    break;
+            }
 
-        return {
-            vocabId: vocab.id,
-            type,
-            questionText,
-            correctAnswer,
-            options: options.sort(() => Math.random() - 0.5),
-            reading: vocab.reading,
-            han: vocab.han,
-        };
-    }, [vocabularyData]);
+            return {
+                vocabId: vocab.id,
+                type,
+                questionText,
+                correctAnswer,
+                options: options.sort(() => Math.random() - 0.5),
+                word: vocab.word,
+                reading: vocab.reading,
+                han: vocab.han,
+            };
+        },
+        [vocabularyData],
+    );
 
     const startQuiz = useCallback(
         (mode: VocabQuizMode = quizMode) => {
@@ -205,6 +236,9 @@ export default function VocabQuiz() {
 
         if (answer === currentQuestion.correctAnswer) {
             playSFX("correct");
+            // Đọc từ vựng khi trả lời đúng
+            playJapaneseAudio(currentQuestion.word);
+            
             if (!hasFailedCurrent) {
                 setScore((prev) => prev + 1);
             }
@@ -371,91 +405,26 @@ export default function VocabQuiz() {
 
     if (!currentQuestion) return null;
 
-
     return (
         <div className="w-full max-w-2xl mx-auto space-y-8 p-4 py-10">
-            {/* Header & Progress */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between px-2">
-                    <Badge
-                        variant="outline"
-                        className="border-primary/20 text-primary bg-primary/5 font-bold px-4 py-1.5 rounded-full flex gap-2"
-                    >
-                        <BrainCircuit size={14} /> Trắc nghiệm Từ vựng N3
-                    </Badge>
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={toggleMute}
-                            className="rounded-full hover:bg-stone-100 text-stone-400"
-                        >
-                            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                        </Button>
-                        <span className="text-sm font-black text-stone-400 uppercase tracking-widest">
-                            {completedCount}/{totalQuestions}
-                        </span>
-                    </div>
-                </div>
-                <div className="relative h-3 w-full bg-stone-100 rounded-full overflow-hidden shadow-inner">
-                    <motion.div
-                        className="absolute inset-y-0 left-0 bg-primary"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                    />
-                </div>
-
-                {/* Tabs for Quiz Mode */}
-                {!isAnswered && completedCount === 0 && (
-                    <div className="flex flex-col items-center gap-6 w-full">
-                        <Tabs
-                            value={quizMode}
-                            onValueChange={(v) => {
-                                const newMode = v as VocabQuizMode;
-                                setQuizMode(newMode);
-                                startQuiz(newMode);
-                            }}
-                            className="w-full flex justify-center"
-                        >
-                            <TabsList className="bg-stone-100/80 p-1 h-12 rounded-2xl border border-stone-200 shadow-sm Vietnamese-Content">
-                                <TabsTrigger
-                                    value="all"
-                                    className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                                >
-                                    Tất cả
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="meaning"
-                                    className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                                >
-                                    Nghĩa
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="reading"
-                                    className="rounded-xl px-6 py-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                                >
-                                    Cách đọc
-                                </TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-
-                        {/* Show All Toggle */}
-                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-stone-100">
-                            <input
-                                type="checkbox"
-                                id="showAll"
-                                checked={showAll}
-                                onChange={(e) => setShowAll(e.target.checked)}
-                                className="w-4 h-4 rounded border-stone-300 text-primary focus:ring-primary cursor-pointer"
-                            />
-                            <label htmlFor="showAll" className="text-sm font-bold text-stone-600 cursor-pointer">
-                                Ôn tập tất cả (bao gồm từ đã thuộc)
-                            </label>
-                        </div>
-                    </div>
-                )}
-            </div>
+            {/* Shared Header & Progress */}
+            <PracticeHeader
+                title="Trắc nghiệm Từ vựng N3"
+                icon={<BrainCircuit size={14} />}
+                modes={VOCAB_MODES}
+                activeMode={quizMode}
+                onModeChange={(mode) => {
+                    const newMode = mode as VocabQuizMode;
+                    setQuizMode(newMode);
+                    startQuiz(newMode);
+                }}
+                currentIndex={completedCount}
+                total={totalQuestions}
+                showAll={showAll}
+                onShowAllChange={setShowAll}
+                isMuted={isMuted}
+                onMuteToggle={toggleMute}
+            />
 
             <AnimatePresence mode="wait">
                 <motion.div
@@ -467,110 +436,26 @@ export default function VocabQuiz() {
                 >
                     <Card className="border-none shadow-2xl shadow-stone-200/60 bg-white rounded-[3rem] p-8 md:p-12 overflow-hidden">
                         <CardContent className="p-0 space-y-10">
-                            {/* Question Section */}
-                            <div className="text-center space-y-6">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 Vietnamese-Content">
-                                    {currentQuestion.type === "word-to-meaning" && "Ý nghĩa của từ này là gì?"}
-                                    {currentQuestion.type === "meaning-to-word" && "Từ vựng nào có nghĩa là:"}
-                                    {currentQuestion.type === "word-to-reading" && "Cách đọc của từ này là gì?"}
-                                </span>
-                                <h2 className={cn(
-                                    "font-black text-stone-900 leading-tight flex flex-col items-center justify-center gap-4",
-                                    currentQuestion.type === "meaning-to-word" ? "text-4xl md:text-6xl Vietnamese-Content" : "text-5xl md:text-8xl font-kanji"
-                                )}>
-                                    {isAnswered && selectedAnswer === currentQuestion.correctAnswer && currentQuestion.type !== "meaning-to-word" ? (
-                                        <ruby className="ruby-position-over">
-                                            {currentQuestion.questionText}
-                                            <rt className="text-primary text-xl md:text-2xl font-bold mb-2 lowercase tracking-normal">
-                                                {currentQuestion.reading}
-                                            </rt>
-                                        </ruby>
-                                    ) : (
-                                        currentQuestion.questionText
-                                    )}
+                            <QuizQuestionDisplay
+                                type={currentQuestion.type}
+                                questionText={currentQuestion.questionText}
+                                correctAnswer={currentQuestion.correctAnswer}
+                                isAnswered={isAnswered}
+                                selectedAnswer={selectedAnswer}
+                                reading={currentQuestion.reading}
+                                han={currentQuestion.han}
+                                questionTypeLabels={VOCAB_QUESTION_LABELS}
+                            />
 
-                                    {/* Hiển thị Âm Hán Việt khi chọn đúng */}
-                                    {isAnswered && selectedAnswer === currentQuestion.correctAnswer && currentQuestion.han && (
-                                        <motion.span
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="text-primary/60 text-lg md:text-xl font-bold uppercase tracking-widest block"
-                                        >
-                                            {currentQuestion.han}
-                                        </motion.span>
-                                    )}
-                                </h2>
-                            </div>
-
-                            {/* Options Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {currentQuestion.options.map((option, idx) => (
-                                    <motion.button
-                                        key={idx}
-                                        onClick={() => handleAnswer(option)}
-                                        disabled={isAnswered && selectedAnswer === currentQuestion.correctAnswer}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className={cn(
-                                            "relative p-6 rounded-[2rem] text-xl font-bold border-2 transition-all duration-200 text-left flex items-center justify-between group",
-                                            !isAnswered
-                                                ? "border-stone-100 hover:border-primary hover:bg-primary/5 text-stone-700"
-                                                : option === selectedAnswer
-                                                  ? option === currentQuestion.correctAnswer
-                                                      ? "border-green-500 bg-green-50 text-green-700"
-                                                      : "border-red-500 bg-red-50 text-red-700"
-                                                  : "border-stone-100 text-stone-400",
-                                        )}
-                                    >
-                                        <span className={cn(
-                                            "font-bold",
-                                            currentQuestion.type === "word-to-meaning" ? "text-xl Vietnamese-Content" : "text-3xl font-kanji"
-                                        )}>
-                                            {option}
-                                        </span>
-                                        {isAnswered &&
-                                            option === selectedAnswer &&
-                                            option === currentQuestion.correctAnswer && (
-                                                <CheckCircle2 className="h-6 w-6 text-green-500 fill-white" />
-                                            )}
-                                        {isAnswered &&
-                                            option === selectedAnswer &&
-                                            option !== currentQuestion.correctAnswer && (
-                                                <XCircle className="h-6 w-6 text-red-500 fill-white" />
-                                            )}
-                                    </motion.button>
-                                ))}
-                            </div>
-
-                            {/* Feedback message & Next Button */}
-                            <div className="min-h-[60px] flex flex-col items-center justify-center gap-4">
-                                {isAnswered && selectedAnswer === currentQuestion.correctAnswer && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="w-full flex flex-col items-center gap-4"
-                                    >
-                                        <Button
-                                            onClick={nextQuestion}
-                                            size="lg"
-                                            className="bg-green-500 hover:bg-green-600 text-white rounded-2xl h-14 px-10 font-bold flex gap-2 shadow-lg shadow-green-200 transition-all hover:scale-105 active:scale-95 Vietnamese-Content"
-                                        >
-                                            Tiếp tục <ArrowRight size={20} />
-                                        </Button>
-                                    </motion.div>
-                                )}
-                                {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="w-full flex flex-col items-center gap-4"
-                                    >
-                                        <p className="text-red-500 font-bold Vietnamese-Content flex items-center gap-2">
-                                            <Sparkles className="h-4 w-4" /> Hãy chọn lại nhé!
-                                        </p>
-                                    </motion.div>
-                                )}
-                            </div>
+                            <QuizOptionsGrid
+                                options={currentQuestion.options}
+                                correctAnswer={currentQuestion.correctAnswer}
+                                isAnswered={isAnswered}
+                                selectedAnswer={selectedAnswer}
+                                onAnswer={handleAnswer}
+                                onNext={nextQuestion}
+                                isKanjiOption={(opt) => currentQuestion.type !== "word-to-meaning" && opt.length <= 6}
+                            />
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -587,5 +472,4 @@ export default function VocabQuiz() {
 
 // Add this to handle pool length check in result screen
 // Logic moved inside component or uses dynamic data
-
 

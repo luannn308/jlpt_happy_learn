@@ -72,6 +72,18 @@ Mọi tác vụ AI thực hiện phải tự đối chiếu với checklist TCRE
 
 ---
 
+## 🤖 Hệ thống Sub Agents (Multi-Agent System)
+
+Để tối ưu hóa hiệu suất và chất lượng, Antigravity có thể vận hành dưới 5 "chế độ" chuyên biệt. Người dùng có thể yêu cầu cụ thể một Agent thực hiện tác vụ:
+
+1.  **🕵️ Thám Tử** ([tham-tu.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/.agents/tham-tu.md)): Chuyên Research, phân tích bug và tìm kiếm giải pháp.
+2.  **🏗️ Kiến Trúc Sư** ([kien-truc-su.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/.agents/kien-truc-su.md)): Chuyên Review code, tối ưu cấu trúc và convention.
+3.  **📜 Sử Gia** ([su-gia.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/.agents/su-gia.md)): Chuyên viết tài liệu, comment và nhật ký dự án.
+4.  **🎨 Nghệ Nhân** ([nghe-nhan.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/.agents/nghe-nhan.md)): Chuyên UI/UX, Premium design và Animation.
+5.  **🧪 Kiểm Định Viên** ([kiem-dinh-vien.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/.agents/kiem-dinh-vien.md)): Chuyên Testing, đảm bảo chất lượng logic và edge cases.
+
+---
+
 ## 🔗 Tham Chiếu Tài Liệu
 - [AGENTS.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/AGENTS.md): Định nghĩa vai trò và phong cách.
 - [CODE_CONVENTION.md](file:///Users/luannguyen/JLPT/PROJECT_WEB_LEARN/CODE_CONVENTION.md): Quy định chi tiết về mã nguồn.

@@ -17,12 +17,7 @@ interface StudyDashboardProps {
     };
 }
 
-export default function StudyDashboard({ 
-    kanjiCount, 
-    vocabCount, 
-    activeTab, 
-    currentProgress 
-}: StudyDashboardProps) {
+export default function StudyDashboard({ kanjiCount, vocabCount, activeTab, currentProgress }: StudyDashboardProps) {
     return (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-10">
             <motion.div
@@ -42,8 +37,8 @@ export default function StudyDashboard({
                         </div>
 
                         <p className="text-stone-500 text-lg leading-relaxed mb-10 max-w-2xl Vietnamese-Content">
-                            Hôm nay bạn cần chinh phục hệ thống từ vựng và Kanji N3. Mỗi mục tiêu đều được tối
-                            ưu hóa để giúp bạn ghi nhớ nhanh và lâu hơn qua ví dụ thực tế.
+                            Hôm nay bạn cần chinh phục hệ thống từ vựng và Kanji N3. Mỗi mục tiêu đều được tối ưu hóa để
+                            giúp bạn ghi nhớ nhanh và lâu hơn qua ví dụ thực tế.
                         </p>
 
                         <div className="flex flex-wrap gap-8">
@@ -52,10 +47,10 @@ export default function StudyDashboard({
                                     Tổng chữ Kanji
                                 </span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-black text-stone-900">
-                                        {kanjiCount}
+                                    <span className="text-4xl font-black text-stone-900">{kanjiCount}</span>
+                                    <span className="text-sm font-bold text-stone-400 uppercase Vietnamese-Content">
+                                        Chữ
                                     </span>
-                                    <span className="text-sm font-bold text-stone-400 uppercase Vietnamese-Content">Chữ</span>
                                 </div>
                             </div>
                             <div className="hidden sm:block w-[1px] bg-stone-100" />
@@ -64,10 +59,10 @@ export default function StudyDashboard({
                                     Tổng từ vựng
                                 </span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-black text-stone-900">
-                                        {vocabCount}
+                                    <span className="text-4xl font-black text-stone-900">{vocabCount}</span>
+                                    <span className="text-sm font-bold text-stone-400 uppercase Vietnamese-Content">
+                                        Từ
                                     </span>
-                                    <span className="text-sm font-bold text-stone-400 uppercase Vietnamese-Content">Từ</span>
                                 </div>
                             </div>
                             <div className="hidden lg:block w-[1px] bg-stone-100 mx-4" />
@@ -75,19 +70,25 @@ export default function StudyDashboard({
                                 <Link href="/flashcards" className="group flex-1 min-w-[140px] sm:flex-none">
                                     <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 hover:bg-primary/90">
                                         <Sparkles className="h-5 w-5 fill-white/20 transition-transform group-hover:rotate-12" />
-                                        <span className="text-xs font-bold uppercase tracking-wider Vietnamese-Content">Ôn tập</span>
+                                        <span className="text-xs font-bold uppercase tracking-wider Vietnamese-Content">
+                                            Ôn tập
+                                        </span>
                                     </div>
                                 </Link>
                                 <Link href="/quiz" className="group flex-1 min-w-[140px] sm:flex-none">
                                     <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border-2 border-primary/10 text-primary transition-all hover:scale-105 active:scale-95 hover:bg-primary/5 hover:border-primary/20">
                                         <BookOpenCheck className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
-                                        <span className="text-xs font-bold uppercase tracking-wider Vietnamese-Content">Trắc nghiệm</span>
+                                        <span className="text-xs font-bold uppercase tracking-wider Vietnamese-Content">
+                                            Trắc nghiệm
+                                        </span>
                                     </div>
                                 </Link>
                                 <Link href="/writing" className="group flex-1 min-w-[140px] sm:flex-none">
                                     <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border-2 border-primary/10 text-primary transition-all hover:scale-105 active:scale-95 hover:bg-primary/5 hover:border-primary/20">
                                         <PenTool className="h-5 w-5 transition-transform group-hover:-rotate-12" />
-                                        <span className="text-xs font-bold uppercase tracking-wider Vietnamese-Content">Tự luận</span>
+                                        <span className="text-xs font-bold uppercase tracking-wider Vietnamese-Content">
+                                            Tự luận
+                                        </span>
                                     </div>
                                 </Link>
                             </nav>
@@ -113,3 +114,4 @@ export default function StudyDashboard({
         </div>
     );
 }
+

@@ -7,9 +7,8 @@ import { KanjiData } from "@/data/kanji";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Volume2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import FuriganaText from "@/components/common/FuriganaText";
+import SpeakButton from "@/components/common/SpeakButton";
 
 interface FlashcardProps {
     data: VocabularyItem | KanjiData;
@@ -26,12 +25,7 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
     const displayHan = data.han;
     const category = isKanji(data) ? "Hán tự" : data.category || "Từ vựng";
 
-    const handleSpeak = (text: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&le=jap`;
-        const audio = new Audio(url);
-        audio.play();
-    };
+
 
     return (
         <div className="group relative h-[450px] w-full max-w-[400px] cursor-pointer perspective-1000" onClick={onFlip}>
@@ -48,14 +42,7 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                 {/* Front Side */}
                 <Card className="absolute inset-0 backface-hidden border-2 border-stone-100 bg-white rounded-[2.5rem] shadow-xl shadow-stone-200/50 flex flex-col items-center justify-center p-8 text-center overscroll-none">
                     <div className="absolute top-6 right-6">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hover:bg-primary/10 text-stone-300 hover:text-primary transition-colors h-12 w-12"
-                            onClick={(e) => handleSpeak(displayWord, e)}
-                        >
-                            <Volume2 className="h-6 w-6" />
-                        </Button>
+                        <SpeakButton text={displayWord} size="lg" />
                     </div>
 
                     <Badge
@@ -103,12 +90,7 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                                             <p className="text-xl font-bold text-stone-700 font-kanji">
                                                 {data.reading}
                                             </p>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 rounded-full hover:bg-primary/10 text-stone-300 hover:text-primary"
-                                                onClick={(e) => handleSpeak(data.reading, e)}
-                                            ></Button>
+                                            <SpeakButton text={data.reading} size="sm" />
                                         </div>
                                     </div>
                                     <div>
@@ -162,18 +144,13 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                                 <>
                                     <div className="flex items-start gap-2 mt-1">
                                         <div className="flex-1">
-                                            <FuriganaText 
-                                                text={data.example} 
-                                                className="text-lg font-bold text-stone-700 leading-relaxed"
+                                            <FuriganaText
+                                                text={data.example}
+                                                className="text-lg font-bold text-stone-700 leading-relaxed has-ruby"
                                                 furiganaClassName="text-xs"
                                             />
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 rounded-full hover:bg-primary/10 text-stone-300 hover:text-primary shrink-0"
-                                            onClick={(e) => handleSpeak(data.example, e)}
-                                        ></Button>
+                                        <SpeakButton text={data.example} size="sm" variant="outline" className="shrink-0" />
                                     </div>
                                     <p className="text-sm font-medium italic text-stone-500 Vietnamese-Content mt-1">
                                         "{data.exampleMeaning}"
@@ -187,14 +164,7 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                                                 <span className="text-base font-bold text-stone-700 font-kanji">
                                                     {v.word} ({v.reading})
                                                 </span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-6 w-6 rounded-full hover:bg-primary/10 text-stone-300 hover:text-primary"
-                                                    onClick={(e) => handleSpeak(v.word, e)}
-                                                >
-                                                    <Volume2 className="h-3 w-3" />
-                                                </Button>
+                                                <SpeakButton text={v.word} size="sm" />
                                             </div>
                                             <span className="text-sm text-stone-500 Vietnamese-Content">
                                                 {v.meaning}
