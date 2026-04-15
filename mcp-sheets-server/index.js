@@ -137,7 +137,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: `Lỗi khi gọi Google Apps Script: ${(error as Error).message}`,
+            text: `Lỗi khi gọi Google Apps Script: ${error.message}`,
           },
         ],
         isError: true,
@@ -183,7 +183,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: `Lỗi khi gọi Google Apps Script: ${(error as Error).message}`,
+            text: `Lỗi khi gọi Google Apps Script: ${error.message}`,
           },
         ],
         isError: true,
