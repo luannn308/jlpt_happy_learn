@@ -1,0 +1,13 @@
+{
+  "name": "mcp-sheets-server",
+  "version": "1.0.0",
+  "description": "MCP Server to append data to Google Sheets",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --no-warnings index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
