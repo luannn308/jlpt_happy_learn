@@ -4,33 +4,114 @@ import Kuroshiro from "kuroshiro";
 import Analyzer from "kuroshiro-analyzer-kuromoji";
 
 const romajiToHiraganaMap: { [key: string]: string } = {
-    'a': 'あ', 'i': 'い', 'u': 'う', 'e': 'え', 'o': 'お',
-    'ka': 'か', 'ki': 'き', 'ku': 'く', 'ke': 'け', 'ko': 'こ',
-    'sa': 'さ', 'shi': 'し', 'su': 'す', 'se': 'せ', 'so': 'そ',
-    'ta': 'た', 'chi': 'ち', 'tsu': 'つ', 'te': 'て', 'to': 'と',
-    'na': 'な', 'ni': 'に', 'nu': 'ぬ', 'ne': 'ね', 'no': 'の',
-    'ha': 'は', 'hi': 'ひ', 'fu': 'ふ', 'he': 'he', 'ho': 'ほ',
-    'ma': 'ま', 'mi': 'み', 'mu': 'む', 'me': 'me', 'mo': 'も',
-    'ya': 'や', 'yu': 'ゆ', 'yo': 'よ',
-    'ra': 'ら', 'ri': 'り', 'ru': 'る', 're': 'れ', 'ro': 'ろ',
-    'wa': 'わ', 'wo': 'を', 'nn': 'ん',
-    'ga': 'が', 'gi': 'ぎ', 'gu': 'ぐ', 'ge': 'げ', 'go': 'ご',
-    'za': 'ざ', 'ji': 'じ', 'zu': 'ず', 'ze': 'ぜ', 'zo': 'ぞ',
-    'da': 'だ', 'di': 'ぢ', 'du': 'づ', 'de': 'で', 'do': 'ど',
-    'ba': 'ば', 'bi': 'び', 'bu': 'ぶ', 'be': 'べ', 'bo': 'ぼ',
-    'pa': 'ぱ', 'pi': 'ぴ', 'pu': 'ぷ', 'pe': 'ぺ', 'po': 'po',
-    'kya': 'きゃ', 'kyu': 'きゅ', 'kyo': 'きょ',
-    'sha': 'しゃ', 'shu': 'しゅ', 'sho': 'しょ',
-    'cha': 'ちゃ', 'chu': 'ちゅ', 'cho': 'cho',
-    'nya': 'にゃ', 'nyu': 'にゅ', 'nyo': 'にょ',
-    'hya': 'ひゃ', 'hyu': 'ひゅ', 'hyo': 'ひょ',
-    'mya': 'みゃ', 'myu': 'みゅ', 'myo': 'みょ',
-    'rya': 'りゃ', 'ryu': 'りゅ', 'ryo': 'りょ',
-    'gya': 'ぎゃ', 'gyu': 'ぎゅ', 'gyo': 'ぎょ',
-    'ja': 'じゃ', 'ju': 'じゅ', 'jo': 'jo',
-    'bya': 'びゃ', 'byu': 'びゅ', 'byo': 'びょ',
-    'pya': 'ぴゃ', 'pyu': 'pyu', 'pyo': 'pyo',
-    'tsa': 'つぁ', 'tsi': 'つぃ', 'tse': 'つぇ', 'tso': 'つぉ',
+    a: "あ",
+    i: "い",
+    u: "う",
+    e: "え",
+    o: "お",
+    ka: "か",
+    ki: "き",
+    ku: "く",
+    ke: "け",
+    ko: "こ",
+    sa: "さ",
+    shi: "し",
+    su: "す",
+    se: "せ",
+    so: "そ",
+    ta: "た",
+    chi: "ち",
+    tsu: "つ",
+    te: "て",
+    to: "と",
+    na: "な",
+    ni: "に",
+    nu: "ぬ",
+    ne: "ね",
+    no: "の",
+    ha: "は",
+    hi: "ひ",
+    fu: "ふ",
+    he: "へ",
+    ho: "ほ",
+    ma: "ま",
+    mi: "み",
+    mu: "む",
+    me: "め",
+    mo: "も",
+    ya: "や",
+    yu: "ゆ",
+    yo: "よ",
+    ra: "ら",
+    ri: "り",
+    ru: "る",
+    re: "れ",
+    ro: "ろ",
+    wa: "わ",
+    wo: "を",
+    nn: "ん",
+    ga: "が",
+    gi: "ぎ",
+    gu: "ぐ",
+    ge: "げ",
+    go: "ご",
+    za: "ざ",
+    ji: "じ",
+    zu: "ず",
+    ze: "ぜ",
+    zo: "ぞ",
+    da: "だ",
+    di: "ぢ",
+    du: "づ",
+    de: "で",
+    do: "ど",
+    ba: "ば",
+    bi: "び",
+    bu: "ぶ",
+    be: "べ",
+    bo: "ぼ",
+    pa: "ぱ",
+    pi: "ぴ",
+    pu: "ぷ",
+    pe: "ぺ",
+    po: "ぽ",
+    kya: "きゃ",
+    kyu: "きゅ",
+    kyo: "きょ",
+    sha: "しゃ",
+    shu: "しゅ",
+    sho: "しょ",
+    cha: "ちゃ",
+    chu: "ちゅ",
+    cho: "ちょ",
+    nya: "にゃ",
+    nyu: "にゅ",
+    nyo: "にょ",
+    hya: "ひゃ",
+    hyu: "ひゅ",
+    hyo: "ひょ",
+    mya: "みゃ",
+    myu: "みゅ",
+    myo: "みょ",
+    rya: "りゃ",
+    ryu: "りゅ",
+    ryo: "りょ",
+    gya: "ぎゃ",
+    gyu: "ぎゅ",
+    gyo: "ぎょ",
+    ja: "じゃ",
+    ju: "じゅ",
+    jo: "じょ",
+    bya: "びゃ",
+    byu: "びゅ",
+    byo: "びょ",
+    pya: "ぴゃ",
+    pyu: "ぴゅ",
+    pyo: "ぴょ",
+    tsa: "つぁ",
+    tsi: "つぃ",
+    tse: "つぇ",
+    tso: "つぉ",
 };
 
 // Singleton instance for Kuroshiro
@@ -45,7 +126,7 @@ async function initKuroshiro() {
     if (isInitializing) {
         // Đợi khởi tạo hoàn thành
         while (isInitializing) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
         }
         return kuroshiroInstance;
     }
@@ -53,9 +134,11 @@ async function initKuroshiro() {
     isInitializing = true;
     try {
         const kuroshiro = new Kuroshiro();
-        await kuroshiro.init(new Analyzer({
-            dictPath: "/dict" // Path to the public/dict folder
-        }));
+        await kuroshiro.init(
+            new Analyzer({
+                dictPath: "/dict", // Path to the public/dict folder
+            }),
+        );
         kuroshiroInstance = kuroshiro;
         return kuroshiroInstance;
     } catch (error) {
@@ -75,7 +158,7 @@ export async function getFurigana(text: string): Promise<string> {
 
     // 1. Kiểm tra cache
     const cacheKey = `furigana_html_${text}`;
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
         const cached = localStorage.getItem(cacheKey);
         if (cached) return cached;
     }
@@ -87,11 +170,11 @@ export async function getFurigana(text: string): Promise<string> {
 
         const result = await kuroshiro.convert(text, {
             to: "hiragana",
-            mode: "furigana"
+            mode: "furigana",
         });
 
         // 3. Lưu vào cache
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
             localStorage.setItem(cacheKey, result);
         }
 
@@ -106,7 +189,7 @@ export async function getFurigana(text: string): Promise<string> {
  * A more robust Romaji to Hiragana converter for real-time typing.
  */
 export function toHiragana(text: string): string {
-    let result = '';
+    let result = "";
     let i = 0;
     const lowerText = text.toLowerCase();
 
@@ -130,14 +213,18 @@ export function toHiragana(text: string): string {
                 result += romajiToHiraganaMap[two];
                 i += 2;
                 found = true;
-            } else if (two[0] === two[1] && two[0] !== 'n') {
+            } else if (
+                two[0] === two[1] && 
+                two[0] >= "a" && two[0] <= "z" && 
+                !["a", "i", "u", "e", "o", "n"].includes(two[0])
+            ) {
                 // Double consonant (っ)
-                result += 'っ';
+                result += "っ";
                 i += 1;
                 found = true;
-            } else if (two[0] === 'n' && !['a', 'i', 'u', 'e', 'o', 'y'].includes(two[1])) {
+            } else if (two[0] === "n" && !["a", "i", "u", "e", "o", "y"].includes(two[1])) {
                 // 'n' followed by a consonant (ex: 'nk') -> 'んk'
-                result += 'ん';
+                result += "ん";
                 i += 1;
                 found = true;
             }
@@ -148,17 +235,17 @@ export function toHiragana(text: string): string {
             const one = lowerText[i];
             const nextOne = lowerText[i + 1];
 
-            if (one === 'n') {
-                if (nextOne === ' ') {
-                    result += 'ん ';
+            if (one === "n") {
+                if (nextOne === " ") {
+                    result += "ん ";
                     i += 2;
                 } else if (!nextOne) {
                     // Last character 'n' stays as 'n' until next char or space
-                    result += 'n';
+                    result += "n";
                     i += 1;
                 } else {
                     // Should be handled by 2-char logic if it was n+consonant
-                    result += 'n';
+                    result += "n";
                     i += 1;
                 }
                 found = true;
@@ -174,3 +261,4 @@ export function toHiragana(text: string): string {
     }
     return result;
 }
+
