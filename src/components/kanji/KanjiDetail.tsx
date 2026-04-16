@@ -163,7 +163,7 @@ export default function KanjiDetail({
                                                                 className="font-kanji text-2xl font-bold text-primary group-hover:scale-110 transition-transform origin-left duration-300 has-ruby"
                                                                 furiganaClassName="text-[0.4em]"
                                                             />
-                                                            <SpeakButton text={v.word} size="sm" />
+                                                            <SpeakButton text={v.word} reading={v.reading} size="sm" />
                                                         </div>
                                                         <span
                                                             className={cn(

@@ -18,8 +18,8 @@ function doPost(e) {
 
         // Mở đúng file Sheet bằng ID
         var spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-        // Chọn tên Tab, nếu truyền 'vocab' thì dùng tab 'Vocab', không thì dùng 'Kanji'. Fallback về Tab đầu tiên
-        var sheetName = dataType === "vocab" ? "Vocab" : "Kanji";
+        // Chọn tên Tab, nếu truyền 'vocab' thì dùng tab 'Vocabulary', không thì dùng 'Kanji'. Fallback về Tab đầu tiên
+        var sheetName = dataType === "vocab" ? "Vocabulary" : "Kanji";
         var sheet = spreadsheet.getSheetByName(sheetName) || spreadsheet.getSheets()[0];
 
         var currentLastRow = sheet.getLastRow();
@@ -40,13 +40,14 @@ function doPost(e) {
 
             var row;
             if (dataType === "vocab") {
-                // Cấu trúc map cho Vocab:
-                // 1.id, 2.word, 3.reading, 4.meaning, 5.type, 6.example, 7.exampleMeaning, 8.isLearned
+                // Cấu trúc map cho Vocabulary:
+                // 1.id, 2.word, 3.reading, 4.meaning, 5.han, 6.example, 7.exampleMeaning, 8.isLearned
                 row = [
                     item.id || lastId,
                     item.word || "",
                     item.reading || "",
                     item.meaning || "",
+                    item.han || "", 
                     item.example || "",
                     item.exampleMeaning || "",
                     item.isLearned !== undefined ? item.isLearned : false,

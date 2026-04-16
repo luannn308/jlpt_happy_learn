@@ -5,19 +5,25 @@
 
 let currentAudio: HTMLAudioElement | null = null;
 
+import { getAudioText } from "./japanese";
+
 /**
  * Play Japanese audio for a given text.
  * Prioritizes Web Speech API (System Voice) for stability and zero-latency.
  */
-export const playJapaneseAudio = (text: string) => {
+export const playJapaneseAudio = async (text: string, reading?: string) => {
     if (!text || typeof window === "undefined") return;
+
+    // Ưu tiên sử dụng reading (phiên âm) nếu có để tránh lỗi biến âm (Rendaku)
+    // Nếu không có reading (phần câu ví dụ), mới sử dụng kuroshiro để convert
+    const hiraganaText = reading || (await getAudioText(text));
 
     // 1. Stop any currently playing audio
     stopAudio();
 
     // 2. Try Web Speech API (First priority for stability)
     if (window.speechSynthesis) {
-        const utterance = new SpeechSynthesisUtterance(text);
+        const utterance = new SpeechSynthesisUtterance(hiraganaText);
         utterance.lang = "ja-JP";
         utterance.rate = 0.9;
         

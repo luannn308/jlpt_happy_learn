@@ -78,6 +78,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   meaning: { type: "string", description: "Nghĩa tiếng Việt (Ví dụ: Giáo viên)" },
                   example: { type: "string", description: "Câu ví dụ tiếng Nhật chứa từ vựng" },
                   exampleMeaning: { type: "string", description: "Nghĩa câu ví dụ tiếng Việt" },
+                  han: { type: "string", description: "Âm Hán Việt (Ví dụ: TIÊN SINH)" },
                 },
                 required: ["word", "reading", "meaning"],
               },

@@ -59,7 +59,7 @@ export default function VocabDetail({
 
                             <div
                                 className="relative mb-2 cursor-pointer group"
-                                onClick={() => playJapaneseAudio(data.word)}
+                                onClick={() => playJapaneseAudio(data.word, data.reading)}
                                 title="Bấm để nghe phát âm"
                             >
                                 <span

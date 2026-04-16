@@ -42,7 +42,11 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                 {/* Front Side */}
                 <Card className="absolute inset-0 backface-hidden border-2 border-stone-100 bg-white rounded-[2.5rem] shadow-xl shadow-stone-200/50 flex flex-col items-center justify-center p-8 text-center overscroll-none">
                     <div className="absolute top-6 right-6">
-                        <SpeakButton text={displayWord} size="lg" />
+                        <SpeakButton 
+                            text={displayWord} 
+                            reading={isVocab(data) ? data.reading : undefined} 
+                            size="lg" 
+                        />
                     </div>
 
                     <Badge
@@ -90,7 +94,7 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                                             <p className="text-xl font-bold text-stone-700 font-kanji">
                                                 {data.reading}
                                             </p>
-                                            <SpeakButton text={data.reading} size="sm" />
+                                            <SpeakButton text={data.reading} reading={data.reading} size="sm" />
                                         </div>
                                     </div>
                                     <div>
@@ -164,7 +168,7 @@ export default function Flashcard({ data, isFlipped, onFlip, mode }: FlashcardPr
                                                 <span className="text-base font-bold text-stone-700 font-kanji">
                                                     {v.word} ({v.reading})
                                                 </span>
-                                                <SpeakButton text={v.word} size="sm" />
+                                                <SpeakButton text={v.word} reading={v.reading} size="sm" />
                                             </div>
                                             <span className="text-sm text-stone-500 Vietnamese-Content">
                                                 {v.meaning}

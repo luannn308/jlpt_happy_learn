@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 
 interface SpeakButtonProps {
     text: string;
+    reading?: string;
     className?: string;
     size?: "sm" | "md" | "lg" | "icon";
     variant?: "ghost" | "outline" | "default" | "secondary";
@@ -20,6 +21,7 @@ interface SpeakButtonProps {
  */
 export default function SpeakButton({
     text,
+    reading,
     className,
     size = "icon",
     variant = "ghost",
@@ -31,7 +33,7 @@ export default function SpeakButton({
         e.stopPropagation(); 
         
         setIsSpeaking(true);
-        playJapaneseAudio(text);
+        playJapaneseAudio(text, reading);
         
         // Use a timeout to simulate the pulse effect on the button
         // SpeechSynthesis 'end' event is inconsistent, so a timeout is better for UI consistency

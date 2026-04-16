@@ -126,16 +126,14 @@ export default function Home() {
 
     const confirmMarkAllAsLearned = useCallback(async () => {
         if (activeTab === "kanji") {
-            const unlearnedKanjiIds = kanjiData
-                .filter((k) => !k.isLearned)
-                .map((k) => k.id);
-            
+            const unlearnedKanjiIds = kanjiData.filter((k) => !k.isLearned).map((k) => k.id);
+
             if (unlearnedKanjiIds.length === 0) return;
 
             // 1. Cập nhật local state (Set)
             setLearned((prev) => {
                 const next = new Set(prev);
-                unlearnedKanjiIds.forEach(id => next.add(id));
+                unlearnedKanjiIds.forEach((id) => next.add(id));
                 return next;
             });
 
@@ -143,16 +141,14 @@ export default function Home() {
             await bulkUpdateLearnedStatus("kanji", unlearnedKanjiIds, true);
             setCurrentIndex(null); // Reset detail view
         } else {
-            const unlearnedVocabIds = vocabularyData
-                .filter((v) => !v.isLearned)
-                .map((v) => v.id);
+            const unlearnedVocabIds = vocabularyData.filter((v) => !v.isLearned).map((v) => v.id);
 
             if (unlearnedVocabIds.length === 0) return;
 
             // 1. Cập nhật local state (Set)
             setLearnedVocab((prev) => {
                 const next = new Set(prev);
-                unlearnedVocabIds.forEach(id => next.add(id));
+                unlearnedVocabIds.forEach((id) => next.add(id));
                 return next;
             });
 

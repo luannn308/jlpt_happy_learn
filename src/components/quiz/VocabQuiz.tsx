@@ -237,7 +237,7 @@ export default function VocabQuiz() {
         if (answer === currentQuestion.correctAnswer) {
             playSFX("correct");
             // Đọc từ vựng khi trả lời đúng
-            playJapaneseAudio(currentQuestion.word);
+            playJapaneseAudio(currentQuestion.word, currentQuestion.reading);
             
             if (!hasFailedCurrent) {
                 setScore((prev) => prev + 1);

@@ -123,7 +123,7 @@ export default function VocabWriting() {
             setTotalAttempted((prev) => prev + 1);
 
             // Đọc từ vựng khi nhập đúng
-            playJapaneseAudio(currentVocab.word);
+            playJapaneseAudio(currentVocab.word, currentVocab.reading);
 
             setTimeout(() => {
                 handleNext();
