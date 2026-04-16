@@ -186,6 +186,39 @@ export async function getFurigana(text: string): Promise<string> {
 }
 
 /**
+ * Chuyển đổi Kanji sang Hiragana dạng trơn (phục vụ phát âm Audio)
+ * Sử dụng localStorage để cache kết quả
+ */
+export async function getAudioText(text: string): Promise<string> {
+    if (!text) return "";
+
+    const cacheKey = `audio_hiragana_${text}`;
+    if (typeof window !== "undefined") {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) return cached;
+    }
+
+    try {
+        const kuroshiro = await initKuroshiro();
+        if (!kuroshiro) return text;
+
+        const result = await kuroshiro.convert(text, {
+            to: "hiragana",
+            mode: "normal",
+        });
+
+        if (typeof window !== "undefined") {
+            localStorage.setItem(cacheKey, result);
+        }
+
+        return result;
+    } catch (error) {
+        console.error("Audio text conversion error:", error);
+        return text;
+    }
+}
+
+/**
  * A more robust Romaji to Hiragana converter for real-time typing.
  */
 export function toHiragana(text: string): string {
